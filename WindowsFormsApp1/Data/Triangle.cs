@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WindowsFormsApp1.Data
+﻿namespace WindowsFormsApp1.Data
 {
     public class Triangle
     {
@@ -16,6 +10,7 @@ namespace WindowsFormsApp1.Data
             Points = new MyPoint[3];
             UV = new MyPoint[3];
         }
+
         public Triangle(MyPoint[] points, MyPoint[] uV)
         {
             Points = points;

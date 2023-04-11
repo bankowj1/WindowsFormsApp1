@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using WindowsFormsApp1.Data;
 
 namespace WindowsFormsApp1.Code
 {
     public class Solids
     {
-        public SceenObject CreateCube(MyPoint point,float size)
+        public SceenObject CreateCube(MyPoint point, float size)
         {
             MyPoint[] points = new MyPoint[]
             {
@@ -41,7 +36,7 @@ namespace WindowsFormsApp1.Code
                 new Vector3(0f, 0f, 0f )),
             };
             List<Triangle> triangles = new List<Triangle>
-            {   
+            {
                 // Front face
                 new Triangle(new MyPoint[] {points[0], points[3], points[1] }, new MyPoint[] {points[0], points[3], points[1] }), // lower left
                 new Triangle(new MyPoint[] {points[0], points[2], points[3] }, new MyPoint[] {points[0], points[2], points[3] }), // upper right
@@ -61,7 +56,7 @@ namespace WindowsFormsApp1.Code
                 new Triangle(new MyPoint[] {points[0], points[1], points[5] }, new MyPoint[] {points[0], points[1], points[5] }), // upper left
                 new Triangle(new MyPoint[] {points[0], points[5], points[4] }, new MyPoint[] {points[0], points[5], points[4] }), // lower right
             };
-            SceenObject cube = new SceenObject(triangles,point,Vector3.One);
+            SceenObject cube = new SceenObject(triangles, point, Vector3.One);
             return cube;
         }
     }

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApp1.Code;
 using WindowsFormsApp1.Data;
@@ -14,11 +10,12 @@ namespace WindowsFormsApp1
     {
         private static Sceen sceen;
         private static Solids solids;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             sceen = new Sceen();
             solids = new Solids();
@@ -26,9 +23,9 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             InitSceen();
             TriangleForm triangleForm = new TriangleForm();
-            Camera camera = new Camera(new MyPoint(new Vector3(-100, -10, 10), new Vector3(0.1f, 0.2f, 1)),Vector3.One);
+            Camera camera = new Camera(new MyPoint(new Vector3(0, 0,0), new Vector3(0f, 0f, 0f)), Vector3.One);
             camera.TriForm = triangleForm;
-            foreach(SceenObject sceenObject in sceen.sceenObjects)
+            foreach (SceenObject sceenObject in sceen.sceenObjects)
             {
                 camera.ObjectProjection(sceenObject);
             }
@@ -37,7 +34,7 @@ namespace WindowsFormsApp1
 
         private static void InitSceen()
         {
-            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(10,10,1000), Vector3.UnitZ), 1000));
+            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(10, 10, 10), Vector3.Zero), 1000));
         }
     }
 }

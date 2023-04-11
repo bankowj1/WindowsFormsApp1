@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using WindowsFormsApp1.Data;
 
 namespace WindowsFormsApp1
 {
@@ -17,6 +11,7 @@ namespace WindowsFormsApp1
         private PictureBox pictureBox1;
         public List<Vector2[]> triangles;
         private Timer timer;
+
         public TriangleForm()
         {
             InitializeComponent();
@@ -34,12 +29,13 @@ namespace WindowsFormsApp1
 
         private void TriangleForm_Load(object sender, EventArgs e)
         {
-
         }
+
         private void timer_Tick(object sender, EventArgs e)
         {
             pictureBox1.Invalidate(); // Trigger the Paint event of the PictureBox
         }
+
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             Point[] points = new Point[]
@@ -53,7 +49,7 @@ namespace WindowsFormsApp1
 
         public void DrawTriangles(object sender, PaintEventArgs e)
         {
-            foreach(Vector2[] vectors in triangles)
+            foreach (Vector2[] vectors in triangles)
             {
                 Console.WriteLine(vectors[0].X);
                 Console.WriteLine(vectors[0].Y);
@@ -66,6 +62,7 @@ namespace WindowsFormsApp1
                 e.Graphics.DrawPolygon(new Pen(Color.Black, 2), points);
             }
         }
+
         public void AddTriangle(Vector2[] v)
         {
             triangles.Add(v);

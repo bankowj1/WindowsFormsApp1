@@ -14,7 +14,7 @@ namespace WindowsFormsApp1.Code
         private int _resX = 1920;
         private int _resY = 1080;
         private float _theta = 90; 
-        private float _randerRange = 1000f;
+        private float _randerRange = 10000f;
         private float _closeRange = 0.1f;
         private TriangleForm _triForm;
         private Matrix4x4 _viewMatrix;
@@ -33,6 +33,8 @@ namespace WindowsFormsApp1.Code
             float projScal = RanderRange / (RanderRange - CloseRange);
             float aspectRatio = ResY / ResX;
             float F = 1 / (float)Math.Tan(Theta * 0.5f / 180 * 3.1415);
+            
+            Console.WriteLine(projScal);
             Console.WriteLine(aspectRatio);
             Console.WriteLine(F);
             _projectionMatrix = new Matrix4x4(
@@ -48,6 +50,7 @@ namespace WindowsFormsApp1.Code
             float projScal = RanderRange / (RanderRange - CloseRange);
             float aspectRatio = (float) ResY / ResX;
             float F = 1 / (float)Math.Tan(Theta * 0.5f / 180 * 3.1415);
+            Console.WriteLine(projScal);
             Console.WriteLine(aspectRatio);
             Console.WriteLine(F);
             _projectionMatrix = new Matrix4x4(
@@ -156,7 +159,7 @@ namespace WindowsFormsApp1.Code
                 Console.WriteLine("pre all");
                 Console.WriteLine(point.Position);
 
-                Vector3 translationWorld = Vector3.Transform(point.Position, translationMatrix);
+                Vector3 translationWorld = Vector3.Transform(point.Position,Matrix4x4.Transpose( translationMatrix));
                 Console.WriteLine("translationWorld");
                 Console.WriteLine(translationMatrix);
                 Console.WriteLine(translationWorld);
@@ -169,7 +172,7 @@ namespace WindowsFormsApp1.Code
                 Console.WriteLine(scaleMatrix);
                 Console.WriteLine(scaleWorld);
 
-                Vector3 translationCamera = Vector3.Transform(scaleWorld, _viewMatrix);
+                Vector3 translationCamera = Vector3.Transform(scaleWorld, Matrix4x4.Transpose(_viewMatrix));
                 Console.WriteLine("translationCamera");
                 Console.WriteLine(_viewMatrix);
                 Console.WriteLine(translationCamera);
@@ -177,15 +180,15 @@ namespace WindowsFormsApp1.Code
                 Console.WriteLine("rotationCamera");
                 Console.WriteLine(_rotationQ);
                 Console.WriteLine(rotationCamera);
-
+                _projectionMatrix = Matrix4x4.Transpose(_projectionMatrix);
                 float w = rotationCamera.X * _projectionMatrix.M14 + rotationCamera.Y * _projectionMatrix.M24 + rotationCamera.Z * _projectionMatrix.M34 + _projectionMatrix.M44;
                 Console.WriteLine("w");
                 Console.WriteLine(w);
                 Console.WriteLine(_projectionMatrix);
                 Vector3 vector3 = new Vector3(
-                    rotationCamera.X * _projectionMatrix.M11 + rotationCamera.Y * _projectionMatrix.M21 + rotationCamera.Z * _projectionMatrix.M31 + _projectionMatrix.M44,
-                    rotationCamera.X * _projectionMatrix.M12 + rotationCamera.Y * _projectionMatrix.M22 + rotationCamera.Z * _projectionMatrix.M32 + _projectionMatrix.M44,
-                    rotationCamera.X * _projectionMatrix.M13 + rotationCamera.Y * _projectionMatrix.M23 + rotationCamera.Z * _projectionMatrix.M33 + _projectionMatrix.M44
+                    rotationCamera.X * _projectionMatrix.M11 + rotationCamera.Y * _projectionMatrix.M21 + rotationCamera.Z * _projectionMatrix.M31 + _projectionMatrix.M41,
+                    rotationCamera.X * _projectionMatrix.M12 + rotationCamera.Y * _projectionMatrix.M22 + rotationCamera.Z * _projectionMatrix.M32 + _projectionMatrix.M42,
+                    rotationCamera.X * _projectionMatrix.M13 + rotationCamera.Y * _projectionMatrix.M23 + rotationCamera.Z * _projectionMatrix.M33 + _projectionMatrix.M43
                     );
                 if(w > 0.00001f)
                 {
@@ -193,7 +196,7 @@ namespace WindowsFormsApp1.Code
                     vector3.Y /= w;
                     vector3.Z /= w;
                 }
-                v[i] = new Vector2((vector3.X+ _resX) /2, (vector3.Y+ _resY)/2);
+                v[i] = new Vector2((rotationCamera.X+ _resX) /2, (rotationCamera.Y+ _resY)/2);
                 Console.WriteLine("v");
                 Console.WriteLine(v[i]);
                 i++;

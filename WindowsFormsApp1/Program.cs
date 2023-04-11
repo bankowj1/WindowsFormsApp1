@@ -26,7 +26,7 @@ namespace WindowsFormsApp1
             Application.SetCompatibleTextRenderingDefault(false);
             InitSceen();
             TriangleForm triangleForm = new TriangleForm();
-            Camera camera = new Camera(new MyPoint(Vector3.Zero, Vector3.UnitZ),Vector3.One);
+            Camera camera = new Camera(new MyPoint(new Vector3(-100, -10, 10), new Vector3(0.1f, 0.2f, 1)),Vector3.One);
             camera.TriForm = triangleForm;
             foreach(SceenObject sceenObject in sceen.sceenObjects)
             {
@@ -37,7 +37,7 @@ namespace WindowsFormsApp1
 
         private static void InitSceen()
         {
-            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(600,600,600), Vector3.UnitZ), 160));
+            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(10,10,1000), Vector3.UnitZ), 1000));
         }
     }
 }

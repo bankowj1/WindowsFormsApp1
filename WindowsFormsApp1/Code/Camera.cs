@@ -11,7 +11,7 @@ namespace WindowsFormsApp1.Code
         private int _resX = 1920;
         private int _resY = 1080;
         private float _theta = 90;
-        private float _randerRange = 10000f;
+        private float _randerRange = 1000f;
         private float _closeRange = 0.1f;
         private TriangleForm _triForm;
         private UserInput _userInput;
@@ -44,7 +44,8 @@ namespace WindowsFormsApp1.Code
         {
             //events
             _userInput.CameraRotation += RotateCamera;
-
+            _userInput.CameraZoom += ZoomCamera;
+            _userInput.CameraPosition += PositionCamera;
             //projection matrix
             ProjectMax();
             //view matrix
@@ -64,8 +65,16 @@ namespace WindowsFormsApp1.Code
             Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }
-
-
+        private void ZoomCamera(object sender, FloatEventArgs e)
+        {
+            _theta += e.V;
+            ProjectMax();
+        }
+        private void PositionCamera(object sender, Vector3EventArgs e)
+        {
+            _anchor.Position = Vector3.Add(_anchor.Position,e.V * 0.1f);
+            CameraMatx();
+        }
         public void SetRes(int x, int y)
         {
             ResX = x; ResY = y;

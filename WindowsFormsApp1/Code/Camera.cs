@@ -217,8 +217,8 @@ namespace WindowsFormsApp1.Code
                 //Normalized Device coordinates
 
                 _projectionMatrix = Matrix4x4.Transpose(_projectionMatrix);
-                
-                Vector4 vector4 = Vector4.Transform(translationCamera, _projectionMatrix);
+                Vector4 vector4 = new Vector4(translationCamera, 1);
+                vector4 = Vector4.Transform(vector4, _projectionMatrix);
                 if (vector4.W > 0.00001f)
                 {
                     vector4.X /= vector4.W;

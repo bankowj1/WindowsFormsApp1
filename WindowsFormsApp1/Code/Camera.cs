@@ -52,7 +52,16 @@ namespace WindowsFormsApp1.Code
         }
         private void RotateCamera(object sender, Vector3EventArgs e)
         {
-            _anchor.Rotation = Vector3.Clamp(Vector3.Add(_anchor.Rotation, e.V * 0.1f),Vector3.Zero,Vector3.One);
+            float max =3.14f*2f;
+            float halfRange = max/2;
+            Console.WriteLine(_anchor.Rotation);
+            Quaternion rotation = Quaternion.CreateFromAxisAngle(e.V, 0.1f);
+            Vector3 v = Vector3.Add(_anchor.Rotation, Vector3.Transform(e.V*0.1f, rotation));
+            v.X = v.X == -1 ? halfRange : ((v.X % max) + halfRange) % max - halfRange;
+            v.Y = v.Y == -1 ? halfRange : ((v.Y % max) + halfRange) % max - halfRange;
+            v.Z = v.Z == -1 ? halfRange : ((v.Z % max) + halfRange) % max - halfRange;
+            _anchor.Rotation = v;
+            Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }
 

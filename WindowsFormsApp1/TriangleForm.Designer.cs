@@ -37,7 +37,6 @@
             this.ClientSize = new System.Drawing.Size(1920, 1080);
             this.Name = "TriangleForm";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.TriangleForm_Load);
             this.ResumeLayout(false);
 
         }

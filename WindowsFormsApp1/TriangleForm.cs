@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsFormsApp1
@@ -10,7 +12,6 @@ namespace WindowsFormsApp1
     {
         private PictureBox pictureBox1;
         public List<Vector2[]> triangles;
-        private Timer timer;
 
         public TriangleForm()
         {
@@ -18,22 +19,31 @@ namespace WindowsFormsApp1
             pictureBox1 = new PictureBox();
             pictureBox1.Dock = DockStyle.Fill;
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox1.Paint += DrawTriangles;
+            
             Controls.Add(pictureBox1);
             triangles = new List<Vector2[]>();
-            timer = new Timer();
-            timer.Interval = 6000;
-            timer.Tick += new EventHandler(timer_Tick);
-            timer.Start();
         }
 
-        private void TriangleForm_Load(object sender, EventArgs e)
+        public async Task UpdateAsync()
         {
-        }
+            Console.WriteLine(triangles.Count);
+            pictureBox1.Invalidate();
 
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            pictureBox1.Invalidate(); // Trigger the Paint event of the PictureBox
+            var tcs = new TaskCompletionSource<bool>();
+
+            PaintEventHandler paintHandler = null;
+            paintHandler = (s, e) =>
+            {
+                DrawTriangles(s, e);
+                pictureBox1.Paint -= paintHandler;
+                tcs.TrySetResult(true);
+            };
+
+            pictureBox1.Paint += paintHandler;
+
+            await tcs.Task;
+
+            Console.WriteLine("Update Form");
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -47,24 +57,23 @@ namespace WindowsFormsApp1
             e.Graphics.DrawPolygon(new Pen(Color.Black, 2), points);
         }
 
-        public void DrawTriangles(object sender, PaintEventArgs e)
+        private async void DrawTriangles(object sender, PaintEventArgs e)
         {
-            foreach (Vector2[] vectors in triangles)
-            {
-                Console.WriteLine(vectors[0].X);
-                Console.WriteLine(vectors[0].Y);
-                Console.WriteLine(vectors[1].X);
-                Console.WriteLine(vectors[1].Y);
-                Console.WriteLine(vectors[2].X);
-                Console.WriteLine(vectors[2].Y);
-                Point[] points = new Point[]
+           
+                Console.WriteLine("DrawTriangles");
+                Console.WriteLine(triangles.Count);
+                foreach (Vector2[] vectors in triangles)
                 {
-                    new Point((int)Math.Floor(vectors[0].X), (int)Math.Floor(vectors[0].Y)),
-                    new Point((int)Math.Floor(vectors[1].X), (int)Math.Floor(vectors[1].Y)),
-                    new Point((int)Math.Floor(vectors[2].X), (int)Math.Floor(vectors[2].Y))
-                };
-                e.Graphics.DrawPolygon(new Pen(Color.Black, 2), points);
-            }
+                    Point[] points = new Point[]
+                    {
+                        new Point((int)Math.Floor(vectors[0].X), (int)Math.Floor(vectors[0].Y)),
+                        new Point((int)Math.Floor(vectors[1].X), (int)Math.Floor(vectors[1].Y)),
+                        new Point((int)Math.Floor(vectors[2].X), (int)Math.Floor(vectors[2].Y))
+                    };
+                    e.Graphics.DrawPolygon(new Pen(Color.Black, 2), points);
+                }
+            
+            
         }
 
         public void AddTriangle(Vector2[] v)

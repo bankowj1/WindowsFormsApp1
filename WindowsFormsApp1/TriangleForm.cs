@@ -53,6 +53,10 @@ namespace WindowsFormsApp1
             {
                 Console.WriteLine(vectors[0].X);
                 Console.WriteLine(vectors[0].Y);
+                Console.WriteLine(vectors[1].X);
+                Console.WriteLine(vectors[1].Y);
+                Console.WriteLine(vectors[2].X);
+                Console.WriteLine(vectors[2].Y);
                 Point[] points = new Point[]
                 {
                     new Point((int)Math.Floor(vectors[0].X), (int)Math.Floor(vectors[0].Y)),

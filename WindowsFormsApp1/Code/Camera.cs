@@ -51,21 +51,24 @@ namespace WindowsFormsApp1.Code
             //view matrix
             CameraMatx();
         }
-        private void RotateCamera(object sender, Vector3EventArgs e)
+        private void RotateCamera(object sender, RotEventArgs e)
         {
             float max =3.14f*2f;
             float halfRange = max/2;
             Console.WriteLine("Rotation");
             Console.WriteLine(_anchor.Rotation);
             Quaternion rotation = Quaternion.CreateFromAxisAngle(e.V, 0.1f);
-            Vector3 v = Vector3.Add(_anchor.Rotation, Vector3.Transform(e.V*0.1f, rotation));
-            v.X = v.X == -1 ? halfRange : ((v.X % max) + halfRange) % max - halfRange;
-            v.Y = v.Y == -1 ? halfRange : ((v.Y % max) + halfRange) % max - halfRange;
-            v.Z = v.Z == -1 ? halfRange : ((v.Z % max) + halfRange) % max - halfRange;
+            Vector3 v = Vector3.Add(_anchor.Rotation, Vector3.Transform(Vector3.One, rotation) * 0.1f*e.F);
+            v.X = v.X == -3.14f ? halfRange : ((v.X % max) + halfRange) % max - halfRange;
+            v.Y = v.Y == -3.14f ? halfRange : ((v.Y % max) + halfRange) % max - halfRange;
+            v.Z = v.Z == -3.14f ? halfRange : ((v.Z % max) + halfRange) % max - halfRange;
             _anchor.Rotation = v;
             Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }
+
+
+
         private void ZoomCamera(object sender, FloatEventArgs e)
         {
             _theta += e.V;
@@ -89,22 +92,17 @@ namespace WindowsFormsApp1.Code
             float far = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) + 0.5f * 1.79f;
             near = Math.Max(near, 0.01f);  // Add a small offset to avoid clipping
             far = Math.Max(far, near + 0.01f);  // Add a small offset to avoid division by zero
-            //float near = -_closeRange + _anchor.Position.Z;//distance of camera to near plane
+            //float near = -_closeRange + _anchor.Position.Z;//distance of camera SIMPLE
             // float far = near + _randerRange;
-            float A = -(far + near) / (far - near);
-            float B = -(2 * far * near) / (far - near);
-            //float A = -(_randerRange + _closeRange) / (_randerRange - _closeRange);
-            //float B = -(2 * _randerRange * _closeRange) / (_randerRange - _closeRange);
+            //float A = -(far + near) / (far - near);
+            // float B = -(2 * far * near) / (far - near);
+            float A = -(_randerRange + _closeRange) / (_randerRange - _closeRange);
+            float B = -(2 * _randerRange * _closeRange) / (_randerRange - _closeRange);
             _projectionMatrix = new Matrix4x4(
                 aspectRatio * tanHalfFOV, 0, 0, 0,
                 0, tanHalfFOV, 0, 0,
                 0, 0, A, B,
                 0, 0, -1, 0);
-
-
-            
-
-
         }
 
         public void CameraMatx()
@@ -225,7 +223,7 @@ namespace WindowsFormsApp1.Code
                 Vector3 translationCamera = Vector3.Transform(rotationCamera, Matrix4x4.Transpose(_viewMatrix));
                 //Console.WriteLine("translationCamera");
                 //Console.WriteLine(_viewMatrix);
-                //Console.WriteLine(translationCamera);
+                Console.WriteLine(translationCamera);
                 //Normalized Device coordinates
 
                 _projectionMatrix = Matrix4x4.Transpose(_projectionMatrix);

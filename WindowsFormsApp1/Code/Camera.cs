@@ -86,13 +86,15 @@ namespace WindowsFormsApp1.Code
             float aspectRatio = (float)ResX / ResY;
             float tanHalfFOV = 1 / (float)Math.Tan((Math.PI / 180) * Theta / 2); // 1/ tangent of half FOV angle
             float near = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) - 1;
-            float far = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) + 0.5f * _randerRange;
+            float far = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) + 0.5f * 1.79f;
             near = Math.Max(near, 0.01f);  // Add a small offset to avoid clipping
             far = Math.Max(far, near + 0.01f);  // Add a small offset to avoid division by zero
             //float near = -_closeRange + _anchor.Position.Z;//distance of camera to near plane
             // float far = near + _randerRange;
-            float A = -(_randerRange + _closeRange) / (_randerRange - _closeRange);
-            float B = -(2 * _randerRange * _closeRange) / (_randerRange - _closeRange);
+            float A = -(far + near) / (far - near);
+            float B = -(2 * far * near) / (far - near);
+            //float A = -(_randerRange + _closeRange) / (_randerRange - _closeRange);
+            //float B = -(2 * _randerRange * _closeRange) / (_randerRange - _closeRange);
             _projectionMatrix = new Matrix4x4(
                 aspectRatio * tanHalfFOV, 0, 0, 0,
                 0, tanHalfFOV, 0, 0,

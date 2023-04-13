@@ -28,7 +28,7 @@ namespace WindowsFormsApp1
             InitSceen();
             triangleForm = new TriangleForm();
             UserInput = new UserInput(triangleForm);
-            camera = new Camera(new MyPoint(new Vector3(0f, 0f,0), new Vector3(0f, 0f, -3.14f)), Vector3.One,UserInput);
+            camera = new Camera(new MyPoint(new Vector3(0f, 0f,10), new Vector3(0f, 0f, -3.14f)), Vector3.One,UserInput);
             camera.TriForm = triangleForm;
             foreach (SceenObject sceenObject in sceen.sceenObjects)
             {

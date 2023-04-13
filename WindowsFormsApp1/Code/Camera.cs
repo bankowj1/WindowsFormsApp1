@@ -53,13 +53,30 @@ namespace WindowsFormsApp1.Code
         }
         private void RotateCamera(object sender, RotEventArgs e)
         {
-            float max =3.14f*2f;
-            float halfRange = max/2;
             Console.WriteLine("Rotation");
             Console.WriteLine(_anchor.Rotation);
-            Quaternion rotation = Quaternion.CreateFromAxisAngle(e.V, 0.1f);
-            Vector3 v = Vector3.Add(_anchor.Rotation, Vector3.Transform(Vector3.One, rotation) * 0.1f*e.F);
-            _anchor.Rotation = Vector3.Normalize(v);
+            Quaternion rotationQ;
+
+            if (Vector3.Distance(_anchor.Rotation, Vector3.Zero) > 0.00001f)
+            {
+                Vector3 reference = Vector3.UnitY;
+                if (Vector3.Dot(_anchor.Rotation, reference) >= 0.999f)
+                {
+                    reference = Vector3.UnitX;
+                }
+                float angle = (float)Math.Acos(Vector3.Dot(_anchor.Rotation, reference));
+
+                Vector3 axis = Vector3.Normalize(Vector3.Cross(_anchor.Rotation, reference));
+                rotationQ = Quaternion.CreateFromAxisAngle(axis, angle);
+
+            }
+            else
+            {
+                rotationQ = new Quaternion(0, 0, 0, 1);
+            }
+            Quaternion rotation = Quaternion.CreateFromAxisAngle(Transform(e.V,rotationQ),(float) (Math.PI / 180) * 1f * e.F);
+            _anchor.Rotation =  Transform(_anchor.Rotation, rotation);
+            
             Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }
@@ -84,9 +101,9 @@ namespace WindowsFormsApp1.Code
         public void ProjectMax()
         {
             float aspectRatio = (float)ResX / ResY;
-            float tanHalfFOV = (float)Math.Tan((Math.PI / 180) * Theta / 2); // 1/ tangent of half FOV angle
-            /*float near = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) - 1;
-            float far = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) + 0.5f * 1.79f;
+            float tanHalfFOV = (float)Math.Tan((Math.PI / 180) * (Theta / 2)); // 1/ tangent of half FOV angle
+            float near = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation);
+            float far = near +1;
             near = Math.Max(near, 0.01f);  // Add a small offset to avoid clipping
             far = Math.Max(far, near + 0.01f);  // Add a small offset to avoid division by zero
             //float near = -_closeRange + _anchor.Position.Z;//distance of camera SIMPLE
@@ -96,15 +113,26 @@ namespace WindowsFormsApp1.Code
             float A = -(_randerRange + _closeRange) / (_randerRange - _closeRange);
             float B = -(2 * _randerRange * _closeRange) / (_randerRange - _closeRange);
             _projectionMatrix = new Matrix4x4(
-                aspectRatio * tanHalfFOV, 0, 0, 0,
-                0, tanHalfFOV, 0, 0,
+                1/ (aspectRatio * tanHalfFOV), 0, 0, 0,
+                0, (1/tanHalfFOV), 0, 0,
                 0, 0, A, B,
-                0, 0, -1, 0);*/
+                0, 0, -1, 0);
+            
             _projectionMatrix = new Matrix4x4(
                 (1/tanHalfFOV) / aspectRatio, 0, 0, 0,
-                0, tanHalfFOV, 0, 0,
-                0, 0, _randerRange/(_closeRange-_randerRange), -1,
-                0, 0, _closeRange* _randerRange / (_closeRange - _randerRange), 0);
+                0, 1/tanHalfFOV, 0, 0,
+                0, 0, _randerRange/(_closeRange-_randerRange), - _closeRange* _randerRange / (_closeRange - _randerRange),
+                0, 0, 1, 0);
+            /*_projectionMatrix = new Matrix4x4(
+                1 / (tanHalfFOV*aspectRatio), 0, 0, 0,
+                0, 1 / tanHalfFOV, 0, 0,
+                0, 0, far / (near - far), -near * far / (near - far),
+                0, 0, 1, 0);*/
+            _projectionMatrix = new Matrix4x4(
+                (1 / tanHalfFOV) / aspectRatio, 0, 0, 0,
+                0, 1 / tanHalfFOV, 0, 0,
+                0, 0,(far+near)/(near-far), (2*far*near)/ ( near-far),
+                0, 0, 1, 0);
         }
 
         public void CameraMatx()
@@ -235,9 +263,10 @@ namespace WindowsFormsApp1.Code
                 {
                     vector4.X /=  vector4.W;
                     vector4.Y /=  vector4.W;
-                    
+                    vector4.Z /= vector4.W;
                 }
                 v[i] = new Vector2(((vector4.X + 1) / 2) * _resX, ((vector4.Y + 1) / 2)* _resY);
+                Console.WriteLine(vector4);
                 i++;
             }
             DrawTriangle(v);

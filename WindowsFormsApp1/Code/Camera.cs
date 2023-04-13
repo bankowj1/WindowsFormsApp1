@@ -84,37 +84,23 @@ namespace WindowsFormsApp1.Code
         public void ProjectMax()
         {
             float aspectRatio = (float)ResX / ResY;
-            float F = 1 / (float)Math.Tan(Theta * 0.5f / 180 * 3.1415);
+            float tanHalfFOV = 1 / (float)Math.Tan((Math.PI / 180) * Theta / 2); // 1/ tangent of half FOV angle
+            float near = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) - 1;
+            float far = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) + 0.5f * _randerRange;
+            near = Math.Max(near, 0.01f);  // Add a small offset to avoid clipping
+            far = Math.Max(far, near + 0.01f);  // Add a small offset to avoid division by zero
+            //float near = -_closeRange + _anchor.Position.Z;//distance of camera to near plane
+            // float far = near + _randerRange;
             float A = -(_randerRange + _closeRange) / (_randerRange - _closeRange);
             float B = -(2 * _randerRange * _closeRange) / (_randerRange - _closeRange);
             _projectionMatrix = new Matrix4x4(
-                aspectRatio * F, 0, 0, 0,
-                0, F, 0, 0,
+                aspectRatio * tanHalfFOV, 0, 0, 0,
+                0, tanHalfFOV, 0, 0,
                 0, 0, A, B,
                 0, 0, -1, 0);
 
 
             
-            float n = -_closeRange + _anchor.Position.Z;//distance of camera to near plane
-            _projectionMatrix = new Matrix4x4(
-                n , 0, 0, 0,
-                0, n, 0, 0,
-                0, 0, A, B,
-                0, 0, -1, 0);
-
-
-            float near =  n;
-            float far = near + _randerRange;
-            float tanHalfFOV = (float) Math.Tan(Theta * 180 * 3.1415f / 2); // tangent of half vertical FOV angle
-            float halfHeight = near * tanHalfFOV; // half height of near plane
-            float halfWidth = halfHeight * aspectRatio; // half width of near plane
-            float right = halfWidth; // right edge of near plane
-            float top = halfHeight; // top edge of near plane
-            _projectionMatrix = new Matrix4x4(
-                near/right     , 0          , 0                         , 0,
-                0               , near/top   , 0                        , 0,
-                0               , 0          , -(far+near)/(far-near)   , -2*(far * near) / (far - near),
-                0               , 0         , -1                        , 0);
 
 
         }

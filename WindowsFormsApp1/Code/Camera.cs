@@ -59,10 +59,7 @@ namespace WindowsFormsApp1.Code
             Console.WriteLine(_anchor.Rotation);
             Quaternion rotation = Quaternion.CreateFromAxisAngle(e.V, 0.1f);
             Vector3 v = Vector3.Add(_anchor.Rotation, Vector3.Transform(Vector3.One, rotation) * 0.1f*e.F);
-            v.X = v.X == -3.14f ? halfRange : ((v.X % max) + halfRange) % max - halfRange;
-            v.Y = v.Y == -3.14f ? halfRange : ((v.Y % max) + halfRange) % max - halfRange;
-            v.Z = v.Z == -3.14f ? halfRange : ((v.Z % max) + halfRange) % max - halfRange;
-            _anchor.Rotation = v;
+            _anchor.Rotation = Vector3.Normalize(v);
             Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }
@@ -231,8 +228,8 @@ namespace WindowsFormsApp1.Code
                 vector4 = Vector4.Transform(vector4, _projectionMatrix);
                 if (vector4.W > 0.00001f)
                 {
-                    vector4.X /= (vector4.Z * vector4.W);
-                    vector4.Y /= (vector4.Z * vector4.W);
+                    vector4.X /=  vector4.W;
+                    vector4.Y /=  vector4.W;
                     
                 }
                 v[i] = new Vector2(((vector4.X + 1) / 2) * _resX, ((vector4.Y + 1) / 2)* _resY);

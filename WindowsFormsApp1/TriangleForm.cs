@@ -64,7 +64,7 @@ namespace WindowsFormsApp1
                 Console.WriteLine(triangles.Count);
                 foreach (Vector2[] vectors in triangles)
                 {
-                    Console.WriteLine(vectors[1]);
+                    //Console.WriteLine(vectors[1]);
                     Point[] points = new Point[]
                     {
                         new Point((int)Math.Floor(vectors[0].X), (int)Math.Floor(vectors[0].Y)),

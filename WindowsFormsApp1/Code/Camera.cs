@@ -84,8 +84,8 @@ namespace WindowsFormsApp1.Code
         public void ProjectMax()
         {
             float aspectRatio = (float)ResX / ResY;
-            float tanHalfFOV = 1 / (float)Math.Tan((Math.PI / 180) * Theta / 2); // 1/ tangent of half FOV angle
-            float near = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) - 1;
+            float tanHalfFOV = (float)Math.Tan((Math.PI / 180) * Theta / 2); // 1/ tangent of half FOV angle
+            /*float near = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) - 1;
             float far = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation) + 0.5f * 1.79f;
             near = Math.Max(near, 0.01f);  // Add a small offset to avoid clipping
             far = Math.Max(far, near + 0.01f);  // Add a small offset to avoid division by zero
@@ -99,7 +99,12 @@ namespace WindowsFormsApp1.Code
                 aspectRatio * tanHalfFOV, 0, 0, 0,
                 0, tanHalfFOV, 0, 0,
                 0, 0, A, B,
-                0, 0, -1, 0);
+                0, 0, -1, 0);*/
+            _projectionMatrix = new Matrix4x4(
+                (1/tanHalfFOV) / aspectRatio, 0, 0, 0,
+                0, tanHalfFOV, 0, 0,
+                0, 0, _randerRange/(_closeRange-_randerRange), -1,
+                0, 0, _closeRange* _randerRange / (_closeRange - _randerRange), 0);
         }
 
         public void CameraMatx()

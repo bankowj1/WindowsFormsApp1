@@ -233,8 +233,8 @@ namespace WindowsFormsApp1.Code
                 vector4 = Vector4.Transform(vector4, _projectionMatrix);
                 if (vector4.W > 0.00001f)
                 {
-                    vector4.X /= vector4.W;
-                    vector4.Y /= vector4.W;
+                    vector4.X /= (vector4.Z * vector4.W);
+                    vector4.Y /= (vector4.Z * vector4.W);
                     
                 }
                 v[i] = new Vector2(((vector4.X + 1) / 2) * _resX, ((vector4.Y + 1) / 2)* _resY);

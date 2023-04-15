@@ -55,27 +55,7 @@ namespace WindowsFormsApp1.Code
         {
             Console.WriteLine("Rotation");
             Console.WriteLine(_anchor.Rotation);
-            Quaternion rotationQ;
-
-            if (Vector3.Distance(_anchor.Rotation, Vector3.Zero) > 0.00001f)
-            {
-                Vector3 reference = Vector3.UnitY;
-                if (Vector3.Dot(_anchor.Rotation, reference) >= 0.999f)
-                {
-                    reference = Vector3.UnitX;
-                }
-                float angle = (float)Math.Acos(Vector3.Dot(_anchor.Rotation, reference));
-
-                Vector3 axis = Vector3.Normalize(Vector3.Cross(_anchor.Rotation, reference));
-                rotationQ = Quaternion.CreateFromAxisAngle(axis, angle);
-
-            }
-            else
-            {
-                rotationQ = new Quaternion(0, 0, 0, 1);
-            }
-            Quaternion rotation = Quaternion.CreateFromAxisAngle(Transform(e.V,rotationQ),(float) (Math.PI / 180) * 1f * e.F);
-            _anchor.Rotation =  Transform(_anchor.Rotation, rotation);
+            _anchor.Rotation = _anchor.Rotation + e.V * e.F * 2f;
             
             Console.WriteLine(_anchor.Rotation);
             CameraMatx();
@@ -112,27 +92,33 @@ namespace WindowsFormsApp1.Code
             // float B = -(2 * far * near) / (far - near);
             float A = -(_randerRange + _closeRange) / (_randerRange - _closeRange);
             float B = -(2 * _randerRange * _closeRange) / (_randerRange - _closeRange);
-            _projectionMatrix = new Matrix4x4(
+            /*_projectionMatrix = new Matrix4x4(
                 1/ (aspectRatio * tanHalfFOV), 0, 0, 0,
                 0, (1/tanHalfFOV), 0, 0,
                 0, 0, A, B,
                 0, 0, -1, 0);
-            
+            */
             _projectionMatrix = new Matrix4x4(
                 (1/tanHalfFOV) / aspectRatio, 0, 0, 0,
                 0, 1/tanHalfFOV, 0, 0,
-                0, 0, _randerRange/(_closeRange-_randerRange), - _closeRange* _randerRange / (_closeRange - _randerRange),
-                0, 0, 1, 0);
+                0, 0, _randerRange/(_closeRange-_randerRange),  _closeRange* _randerRange / (_closeRange - _randerRange),
+                0, 0, -1, 0);
+            _projectionMatrix = new Matrix4x4(
+                1/ ( tanHalfFOV* aspectRatio), 0, 0, 0,
+                0, 1 / tanHalfFOV, 0, 0,
+                0, 0, _randerRange / (_closeRange - _randerRange), _closeRange * _randerRange / (_closeRange - _randerRange),
+                0, 0, -1, 0);
             /*_projectionMatrix = new Matrix4x4(
                 1 / (tanHalfFOV*aspectRatio), 0, 0, 0,
                 0, 1 / tanHalfFOV, 0, 0,
                 0, 0, far / (near - far), -near * far / (near - far),
                 0, 0, 1, 0);*/
-            _projectionMatrix = new Matrix4x4(
+            /*_projectionMatrix = new Matrix4x4(
                 (1 / tanHalfFOV) / aspectRatio, 0, 0, 0,
                 0, 1 / tanHalfFOV, 0, 0,
-                0, 0,(far+near)/(near-far), (2*far*near)/ ( near-far),
-                0, 0, 1, 0);
+                0, 0,-(_randerRange + _closeRange)/(_randerRange-_closeRange), -(2*_randerRange*_closeRange)/ (_randerRange - _closeRange),
+                0, 0, 1, 0);*/
+
         }
 
         public void CameraMatx()
@@ -145,42 +131,11 @@ namespace WindowsFormsApp1.Code
                 0, 1, 0, cameraPosition.Y,
                 0, 0, 1, cameraPosition.Z,
                 0, 0, 0, 1);
+            _rotationQ = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
 
-            if (Vector3.Distance(cameraRotation, Vector3.Zero) > 0.00001f)
-            {
-                Vector3 reference = Vector3.UnitY;
-                if (Vector3.Dot(cameraRotation, reference) >= 0.999f)
-                {
-                    reference = Vector3.UnitX;
-                }
-                float angle = (float)Math.Acos(Vector3.Dot(cameraRotation, reference));
-                Vector3 axis = Vector3.Normalize(Vector3.Cross(cameraRotation, reference));
-                _rotationQ = Quaternion.CreateFromAxisAngle(axis, angle);
-            }
-            else
-            {
-                _rotationQ = new Quaternion(0, 0, 0, 1);
-            }
-            //both options
-            /*
-            Matrix4x4 Rx = new Matrix4x4(
-                1, 0, 0, 0,
-                0, (float)Math.Cos(cameraRotation.X), -(float)Math.Sin(cameraRotation.X), 0,
-                0, (float)Math.Sin(cameraRotation.X), (float)Math.Cos(cameraRotation.X), 0,
-                0, 0, 0, 1);
-            Matrix4x4 Ry = new Matrix4x4(
-                (float)Math.Cos(cameraRotation.Y), 0, (float)Math.Sin(cameraRotation.Y), 0,
-                0, 1, 0, 0,
-                -(float)Math.Sin(cameraRotation.Y), 0, (float)Math.Cos(cameraRotation.Y), 0,
-                0, 0, 0, 1);
-            Matrix4x4 Rz = new Matrix4x4(
-                (float)Math.Cos(cameraRotation.Z), -(float)Math.Sin(cameraRotation.Z), 0, 0,
-                (float)Math.Sin(cameraRotation.Z), (float)Math.Cos(cameraRotation.Z), 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1);
-            Matrix4x4 rotationMatrix = Rz * Ry * Rx;*/
+            Matrix4x4 rotationMatrix = RotationMatrixDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
 
-            _viewMatrix = translationMatrix;// * rotationMatrix;;
+            _viewMatrix = translationMatrix * rotationMatrix;;
         }
 
         public void ObjectProjection(SceenObject sceenObject)
@@ -197,33 +152,17 @@ namespace WindowsFormsApp1.Code
                0, 0, sceenObject.Scale.Z, 0,
                0, 0, 0, 1);
 
-            Quaternion rotationQ;
+            Quaternion rotationQ = QuaternionFromEulerDeg(sceenObject.Anchor.Rotation.X, sceenObject.Anchor.Rotation.Y, -sceenObject.Anchor.Rotation.Z);
 
-            if (Vector3.Distance(sceenObject.Anchor.Rotation, Vector3.Zero) > 0.00001f)
-            {
-                Vector3 reference = Vector3.UnitY;
-                if (Vector3.Dot(sceenObject.Anchor.Rotation, reference) >= 0.999f)
-                {
-                    reference = Vector3.UnitX;
-                }
-                float angle = (float)Math.Acos(Vector3.Dot(sceenObject.Anchor.Rotation, reference));
-                
-                Vector3 axis = Vector3.Normalize(Vector3.Cross(sceenObject.Anchor.Rotation, reference));
-                rotationQ = Quaternion.CreateFromAxisAngle(axis, angle);
-                
-            }
-            else
-            {
-                rotationQ = new Quaternion(0, 0, 0, 1);
-            }
+            Matrix4x4 rotationMatrix = RotationMatrixDeg(sceenObject.Anchor.Rotation.X,  sceenObject.Anchor.Rotation.Y, -sceenObject.Anchor.Rotation.Z);
 
             foreach (Triangle triangle in sceenObject.Triangles)
             {
-                TriangleProjectrion(triangle, translationMatrix, scaleMatrix, rotationQ);
+                TriangleProjectrion(triangle, translationMatrix, scaleMatrix, rotationQ,rotationMatrix);
             }
         }
 
-        public void TriangleProjectrion(Triangle triangle, Matrix4x4 translationMatrix, Matrix4x4 scaleMatrix, Quaternion rotationQ)
+        public void TriangleProjectrion(Triangle triangle, Matrix4x4 translationMatrix, Matrix4x4 scaleMatrix, Quaternion rotationQ,Matrix4x4 rotatiobMatrix)
         {
             Vector2[] v = new Vector2[3];
             int i = 0;
@@ -232,40 +171,42 @@ namespace WindowsFormsApp1.Code
                 //Console.WriteLine("pre all");
                 //Console.WriteLine(point.Position);
                 //
-                Vector3 scaleWorld = Vector3.Transform(point.Position, scaleMatrix);
+                //Vector3 scaleWorld = Vector3.Transform(point.Position, scaleMatrix);
                 //Console.WriteLine("scaleWorld");
                 //Console.WriteLine(scaleMatrix);
                 //Console.WriteLine(scaleWorld);
-                Vector3 rotationWorld = Vector3.Transform(scaleWorld, rotationQ);
-                //Console.WriteLine("rotationWorld");
-                //Console.WriteLine(rotationQ);
-                //Console.WriteLine(rotationWorld);
-                Vector3 translationWorld = Vector3.Transform(rotationWorld, Matrix4x4.Transpose(translationMatrix));
-                //Console.WriteLine("translationWorld");
-                //Console.WriteLine(translationMatrix);
-                //Console.WriteLine(translationWorld);
+                //Vector3 rotationWorld = Vector3.Transform(scaleWorld, rotationQ);
+                Console.WriteLine("rotationQWorld");
+                Console.WriteLine(rotationQ);
+                Console.WriteLine("rotationMWorld");
+                Console.WriteLine(rotatiobMatrix);
+                Vector3 translationWorld = Vector3.Transform(point.Position,  Matrix4x4.Transpose(translationMatrix* rotatiobMatrix*scaleMatrix));
+                Console.WriteLine("translationWorld");
+                Console.WriteLine(translationMatrix);
+                Console.WriteLine(translationWorld);
                 //
                 //
-                Vector3 rotationCamera = Vector3.Transform(translationWorld, _rotationQ);
-                //Console.WriteLine("rotationCamera");
-                //Console.WriteLine(_rotationQ);
+                //Vector3 rotationCamera = Vector3.Transform(translationWorld, _rotationQ);
+                Console.WriteLine("rotationCamera");
+                Console.WriteLine(_rotationQ);
                 //Console.WriteLine(rotationCamera);
-                Vector3 translationCamera = Vector3.Transform(rotationCamera, Matrix4x4.Transpose(_viewMatrix));
-                //Console.WriteLine("translationCamera");
-                //Console.WriteLine(_viewMatrix);
+                Vector3 translationCamera = Vector3.Transform(translationWorld, Matrix4x4.Transpose(_viewMatrix));
+                Console.WriteLine("translationCamera");
+                Console.WriteLine(_viewMatrix);
                 Console.WriteLine(translationCamera);
                 //Normalized Device coordinates
 
                 _projectionMatrix = Matrix4x4.Transpose(_projectionMatrix);
                 Vector4 vector4 = new Vector4(translationCamera, 1);
                 vector4 = Vector4.Transform(vector4, _projectionMatrix);
-                if (vector4.W > 0.00001f)
+                Console.WriteLine(vector4);
+                if (Math.Abs(vector4.W) > 0.00001f)
                 {
-                    vector4.X /=  vector4.W;
-                    vector4.Y /=  vector4.W;
-                    vector4.Z /= vector4.W;
+                    vector4.X = vector4.X/  vector4.W;
+                    vector4.Y = vector4.Y / vector4.W;
+                    vector4.Z = vector4.Z / vector4.W;
                 }
-                v[i] = new Vector2(((vector4.X + 1) / 2) * _resX, ((vector4.Y + 1) / 2)* _resY);
+                v[i] = new Vector2(((translationCamera.X + 1) / 2) * _resX, ((translationCamera.Y + 1) / 2)* _resY);
                 Console.WriteLine(vector4);
                 i++;
             }
@@ -276,6 +217,54 @@ namespace WindowsFormsApp1.Code
         {
             TriForm.AddTriangle(v);
             Console.WriteLine(ii++);
+        }
+        public static Matrix4x4 RotationMatrixDeg(float x, float y, float z)
+        {
+            return RotationMatrixRad(Radians(x), Radians(y), Radians(z));
+        }
+
+            public static Matrix4x4 RotationMatrixRad(float x, float y, float z)
+        {
+            Matrix4x4 zM = new Matrix4x4(
+               (float)Math.Cos(z), -(float)Math.Sin(z), 0, 0,
+               (float)Math.Sin(z), (float)Math.Cos(z), 0, 0,
+               0, 0, 1, 0,
+               0, 0, 0, 1);
+            Matrix4x4 yM = new Matrix4x4(
+                (float)Math.Cos(y), 0, (float)Math.Sin(y), 0,
+                0, 1, 0, 0,
+                -(float)Math.Sin(y), 0, (float)Math.Cos(y), 0,
+                0, 0, 0, 1);
+            Matrix4x4 xM = new Matrix4x4(
+                 1, 0, 0, 0,
+                 0, (float)Math.Cos(x), -(float)Math.Sin(x), 0,
+                 0, (float)Math.Sin(x), (float)Math.Cos(x), 0,
+                 0, 0, 0, 1);
+            Matrix4x4 rotationMatrix = xM * yM * zM;
+            return rotationMatrix;
+        }
+        public static Quaternion QuaternionFromEulerDeg(float x, float y, float z)
+        {
+            return QuaternionFromEulerRad(Radians(x), Radians(y), Radians(z));
+        }
+            public static Quaternion QuaternionFromEulerRad(float x, float y, float z)
+        {
+            double cr = Math.Cos(x * 0.5);
+            double sr = Math.Sin(x * 0.5);
+            double cp = Math.Cos(y * 0.5);
+            double sp = Math.Sin(y * 0.5);
+            double cy = Math.Cos(z * 0.5);
+            double sy = Math.Sin(z * 0.5);
+            return new Quaternion(
+                x: (float)(sr * cp * cy - cr * sp * sy),
+                y: (float)(cr * sp * cy + sr * cp * sy),
+                z: (float)(cr * cp * sy - sr * sp * cy),
+                w: (float)(cr * cp * cy + sr * sp * sy));
+        }
+
+        public static float Radians(float f)
+        {
+            return (float)((f%360)* Math.PI / 180.0);
         }
 
         public static Vector3 Transform(Vector3 value, Quaternion rotation)

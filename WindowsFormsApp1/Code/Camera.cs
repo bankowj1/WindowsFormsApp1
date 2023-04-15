@@ -11,7 +11,7 @@ namespace WindowsFormsApp1.Code
         private int _resX = 1920;
         private int _resY = 1080;
         private float _theta = 90;
-        private float _randerRange = 1000f;
+        private float _randerRange = 10000f;
         private float _closeRange = 0.1f;
         private TriangleForm _triForm;
         private UserInput _userInput;
@@ -55,8 +55,7 @@ namespace WindowsFormsApp1.Code
         {
             Console.WriteLine("Rotation");
             Console.WriteLine(_anchor.Rotation);
-            _anchor.Rotation = _anchor.Rotation + e.V * e.F * 2f;
-            
+            _anchor.Rotation = _anchor.Rotation + (e.V * e.F * 2f);
             Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }
@@ -83,22 +82,22 @@ namespace WindowsFormsApp1.Code
             float aspectRatio = (float)ResX / ResY;
             float tanHalfFOV = (float)Math.Tan((Math.PI / 180) * (Theta / 2)); // 1/ tangent of half FOV angle
             float near = Vector3.Dot((Vector3.Zero - _anchor.Position), _anchor.Rotation);
-            float far = near +1;
-            near = Math.Max(near, 0.01f);  // Add a small offset to avoid clipping
-            far = Math.Max(far, near + 0.01f);  // Add a small offset to avoid division by zero
+            float far = near + _randerRange;
+            //near = Math.Max(near, 0.01f);  // Add a small offset to avoid clipping
+            //far = Math.Max(far, near + 0.01f);  // Add a small offset to avoid division by zero
             //float near = -_closeRange + _anchor.Position.Z;//distance of camera SIMPLE
             // float far = near + _randerRange;
             //float A = -(far + near) / (far - near);
             // float B = -(2 * far * near) / (far - near);
             float A = -(_randerRange + _closeRange) / (_randerRange - _closeRange);
             float B = -(2 * _randerRange * _closeRange) / (_randerRange - _closeRange);
-            /*_projectionMatrix = new Matrix4x4(
+            _projectionMatrix = new Matrix4x4(
                 1/ (aspectRatio * tanHalfFOV), 0, 0, 0,
                 0, (1/tanHalfFOV), 0, 0,
                 0, 0, A, B,
                 0, 0, -1, 0);
-            */
-            _projectionMatrix = new Matrix4x4(
+            
+           /* _projectionMatrix = new Matrix4x4(
                 (1/tanHalfFOV) / aspectRatio, 0, 0, 0,
                 0, 1/tanHalfFOV, 0, 0,
                 0, 0, _randerRange/(_closeRange-_randerRange),  _closeRange* _randerRange / (_closeRange - _randerRange),
@@ -108,7 +107,7 @@ namespace WindowsFormsApp1.Code
                 0, 1 / tanHalfFOV, 0, 0,
                 0, 0, _randerRange / (_closeRange - _randerRange), _closeRange * _randerRange / (_closeRange - _randerRange),
                 0, 0, -1, 0);
-            /*_projectionMatrix = new Matrix4x4(
+            _projectionMatrix = new Matrix4x4(
                 1 / (tanHalfFOV*aspectRatio), 0, 0, 0,
                 0, 1 / tanHalfFOV, 0, 0,
                 0, 0, far / (near - far), -near * far / (near - far),
@@ -135,7 +134,7 @@ namespace WindowsFormsApp1.Code
 
             Matrix4x4 rotationMatrix = RotationMatrixDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
 
-            _viewMatrix = translationMatrix * rotationMatrix;;
+            _viewMatrix =  translationMatrix * rotationMatrix;
         }
 
         public void ObjectProjection(SceenObject sceenObject)
@@ -176,38 +175,35 @@ namespace WindowsFormsApp1.Code
                 //Console.WriteLine(scaleMatrix);
                 //Console.WriteLine(scaleWorld);
                 //Vector3 rotationWorld = Vector3.Transform(scaleWorld, rotationQ);
-                Console.WriteLine("rotationQWorld");
-                Console.WriteLine(rotationQ);
-                Console.WriteLine("rotationMWorld");
-                Console.WriteLine(rotatiobMatrix);
-                Vector3 translationWorld = Vector3.Transform(point.Position,  Matrix4x4.Transpose(translationMatrix* rotatiobMatrix*scaleMatrix));
-                Console.WriteLine("translationWorld");
-                Console.WriteLine(translationMatrix);
-                Console.WriteLine(translationWorld);
+
+                Vector4 translationWorld = Vector4.Transform(point.Position,  Matrix4x4.Transpose(_projectionMatrix * _viewMatrix*(translationMatrix * rotatiobMatrix*scaleMatrix )));
+                //Console.WriteLine("translationWorld");
+                //Console.WriteLine(translationMatrix);
+                //Console.WriteLine(translationWorld);
                 //
                 //
                 //Vector3 rotationCamera = Vector3.Transform(translationWorld, _rotationQ);
-                Console.WriteLine("rotationCamera");
-                Console.WriteLine(_rotationQ);
+                //Console.WriteLine("rotationCamera");
+                //Console.WriteLine(_rotationQ);
                 //Console.WriteLine(rotationCamera);
-                Vector3 translationCamera = Vector3.Transform(translationWorld, Matrix4x4.Transpose(_viewMatrix));
-                Console.WriteLine("translationCamera");
-                Console.WriteLine(_viewMatrix);
-                Console.WriteLine(translationCamera);
+                //Vector3 translationCamera = Vector3.Transform(translationWorld, Matrix4x4.Transpose(_viewMatrix));
+                //Console.WriteLine("translationCamera");
+                //Console.WriteLine(_viewMatrix);
+                //Console.WriteLine(translationCamera);
                 //Normalized Device coordinates
 
-                _projectionMatrix = Matrix4x4.Transpose(_projectionMatrix);
-                Vector4 vector4 = new Vector4(translationCamera, 1);
-                vector4 = Vector4.Transform(vector4, _projectionMatrix);
-                Console.WriteLine(vector4);
-                if (Math.Abs(vector4.W) > 0.00001f)
+                //_projectionMatrix = Matrix4x4.Transpose(_projectionMatrix);
+                //Vector4 vector4 = new Vector4(translationCamera, 1);
+                //vector4 = Vector4.Transform(vector4, _projectionMatrix);
+                //Console.WriteLine(vector4);
+                if (Math.Abs(translationWorld.W) > 0.00001f)
                 {
-                    vector4.X = vector4.X/  vector4.W;
-                    vector4.Y = vector4.Y / vector4.W;
-                    vector4.Z = vector4.Z / vector4.W;
+                    translationWorld.X = translationWorld.X/ translationWorld.W;
+                    translationWorld.Y = translationWorld.Y / translationWorld.W;
+                    translationWorld.Z = translationWorld.Z / translationWorld.W;
                 }
-                v[i] = new Vector2(((translationCamera.X + 1) / 2) * _resX, ((translationCamera.Y + 1) / 2)* _resY);
-                Console.WriteLine(vector4);
+                v[i] = new Vector2(((translationWorld.X + 1) / 2) * _resX, ((translationWorld.Y + 1) / 2)* _resY);
+                //Console.WriteLine(vector4);
                 i++;
             }
             DrawTriangle(v);

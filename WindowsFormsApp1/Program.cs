@@ -28,7 +28,7 @@ namespace WindowsFormsApp1
             InitSceen();
             triangleForm = new TriangleForm();
             UserInput = new UserInput(triangleForm);
-            camera = new Camera(new MyPoint(new Vector3(0f, 0f,10), new Vector3(0f, 0f, 0f)), Vector3.One,UserInput);
+            camera = new Camera(new MyPoint(new Vector3(0f, 0f,0), new Vector3(0f, 0f, 0f)), Vector3.One,UserInput);
             camera.TriForm = triangleForm;
             foreach (SceenObject sceenObject in sceen.sceenObjects)
             {
@@ -74,7 +74,7 @@ namespace WindowsFormsApp1
                 {
                     for(int k = 1; k < 3; k++)
                     {
-                        sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(-0.5f+i* 0.5f, -0.5f + j * 0.5f, 1.1f + k * 0.5f), new Vector3(00f,45f, 00f)), 0.25f));
+                        sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(-0.5f+i* 0.5f, -0.5f + j * 0.5f, 1.1f + k * 0.5f), new Vector3(05f,05f, 00f)), 0.25f));
                     }
                 }
             }

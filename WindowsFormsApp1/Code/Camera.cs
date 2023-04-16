@@ -97,27 +97,32 @@ namespace WindowsFormsApp1.Code
                 0, (1/tanHalfFOV), 0, 0,
                 0, 0, A, B,
                 0, 0, -1, 0);
-            
-           /* _projectionMatrix = new Matrix4x4(
+            /*
+            _projectionMatrix = new Matrix4x4(
                 (1/tanHalfFOV) / aspectRatio, 0, 0, 0,
                 0, 1/tanHalfFOV, 0, 0,
                 0, 0, _randerRange/(_closeRange-_randerRange),  _closeRange* _randerRange / (_closeRange - _randerRange),
-                0, 0, -1, 0);
+                0, 0, -1, 0);*//*
             _projectionMatrix = new Matrix4x4(
                 1/ ( tanHalfFOV* aspectRatio), 0, 0, 0,
                 0, 1 / tanHalfFOV, 0, 0,
                 0, 0, _randerRange / (_closeRange - _randerRange), _closeRange * _randerRange / (_closeRange - _randerRange),
-                0, 0, -1, 0);
-            _projectionMatrix = new Matrix4x4(
+                0, 0, -1, 0);*/
+            /*_projectionMatrix = new Matrix4x4(
                 1 / (tanHalfFOV*aspectRatio), 0, 0, 0,
                 0, 1 / tanHalfFOV, 0, 0,
                 0, 0, far / (near - far), -near * far / (near - far),
-                0, 0, 1, 0);*/
-            /*_projectionMatrix = new Matrix4x4(
+                0, 0, 1, 0);*//*
+            _projectionMatrix = new Matrix4x4(
                 (1 / tanHalfFOV) / aspectRatio, 0, 0, 0,
                 0, 1 / tanHalfFOV, 0, 0,
                 0, 0,-(_randerRange + _closeRange)/(_randerRange-_closeRange), -(2*_randerRange*_closeRange)/ (_randerRange - _closeRange),
-                0, 0, 1, 0);*/
+                0, 0, 1, 0);
+            _projectionMatrix = new Matrix4x4(
+                1 / (tanHalfFOV * aspectRatio), 0, 0, 0,
+                0, 1 / tanHalfFOV, 0, 0,
+                0, 0, _randerRange / (_closeRange - _randerRange), _closeRange * _randerRange / (_closeRange - _randerRange),
+                0, 0, -1, 0);*/
 
         }
 
@@ -132,10 +137,11 @@ namespace WindowsFormsApp1.Code
                 0, 0, 1, cameraPosition.Z,
                 0, 0, 0, 1);
             _rotationQ = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
-
+            
             Matrix4x4 rotationMatrix = RotationMatrixDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
-
-            _viewMatrix =  translationMatrix * rotationMatrix;
+            Console.WriteLine(rotationMatrix);
+            Console.WriteLine(Matrix4x4.CreateFromYawPitchRoll(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z));
+            _viewMatrix =  translationMatrix * rotationMatrix ;
         }
 
         public void ObjectProjection(SceenObject sceenObject)
@@ -168,8 +174,7 @@ namespace WindowsFormsApp1.Code
             int i = 0;
             foreach (MyPoint point in triangle.Points)
             {
-
-                Vector4 translationWorld = Vector4.Transform(point.Position,  Matrix4x4.Transpose(_projectionMatrix * _viewMatrix*(translationMatrix * rotatiobMatrix*scaleMatrix )));
+                Vector4 translationWorld = Vector4.Transform(point.Position,  Matrix4x4.Transpose(_projectionMatrix * _viewMatrix *(translationMatrix * rotatiobMatrix*scaleMatrix )));
 
                 if (Math.Abs(translationWorld.W) > 0.00001f)
                 {
@@ -194,7 +199,7 @@ namespace WindowsFormsApp1.Code
             return RotationMatrixRad(Radians(x), Radians(y), Radians(z));
         }
 
-            public static Matrix4x4 RotationMatrixRad(float x, float y, float z)
+        public static Matrix4x4 RotationMatrixRad(float x, float y, float z)
         {
             Matrix4x4 zM = new Matrix4x4(
                (float)Math.Cos(z), -(float)Math.Sin(z), 0, 0,
@@ -211,7 +216,7 @@ namespace WindowsFormsApp1.Code
                  0, (float)Math.Cos(x), -(float)Math.Sin(x), 0,
                  0, (float)Math.Sin(x), (float)Math.Cos(x), 0,
                  0, 0, 0, 1);
-            Matrix4x4 rotationMatrix = xM * yM * zM;
+            Matrix4x4 rotationMatrix = zM * yM * xM;
             return rotationMatrix;
         }
         public static Quaternion QuaternionFromEulerDeg(float x, float y, float z)

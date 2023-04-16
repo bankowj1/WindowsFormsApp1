@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.RootFinding;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Windows.Forms;
@@ -69,7 +70,7 @@ namespace WindowsFormsApp1.Code
         }
         private void PositionCamera(object sender, Vector3EventArgs e)
         {
-            _anchor.Position = Vector3.Add(_anchor.Position,e.V * 0.1f);
+            _anchor.Position = Vector3.Add(_anchor.Position, Vector3.Transform(e.V, RotationMatrixDeg(_anchor.Rotation.X, _anchor.Rotation.Y, -_anchor.Rotation.Z)) * 0.1f);
             CameraMatx();
         }
         public void SetRes(int x, int y)
@@ -167,35 +168,9 @@ namespace WindowsFormsApp1.Code
             int i = 0;
             foreach (MyPoint point in triangle.Points)
             {
-                //Console.WriteLine("pre all");
-                //Console.WriteLine(point.Position);
-                //
-                //Vector3 scaleWorld = Vector3.Transform(point.Position, scaleMatrix);
-                //Console.WriteLine("scaleWorld");
-                //Console.WriteLine(scaleMatrix);
-                //Console.WriteLine(scaleWorld);
-                //Vector3 rotationWorld = Vector3.Transform(scaleWorld, rotationQ);
 
                 Vector4 translationWorld = Vector4.Transform(point.Position,  Matrix4x4.Transpose(_projectionMatrix * _viewMatrix*(translationMatrix * rotatiobMatrix*scaleMatrix )));
-                //Console.WriteLine("translationWorld");
-                //Console.WriteLine(translationMatrix);
-                //Console.WriteLine(translationWorld);
-                //
-                //
-                //Vector3 rotationCamera = Vector3.Transform(translationWorld, _rotationQ);
-                //Console.WriteLine("rotationCamera");
-                //Console.WriteLine(_rotationQ);
-                //Console.WriteLine(rotationCamera);
-                //Vector3 translationCamera = Vector3.Transform(translationWorld, Matrix4x4.Transpose(_viewMatrix));
-                //Console.WriteLine("translationCamera");
-                //Console.WriteLine(_viewMatrix);
-                //Console.WriteLine(translationCamera);
-                //Normalized Device coordinates
 
-                //_projectionMatrix = Matrix4x4.Transpose(_projectionMatrix);
-                //Vector4 vector4 = new Vector4(translationCamera, 1);
-                //vector4 = Vector4.Transform(vector4, _projectionMatrix);
-                //Console.WriteLine(vector4);
                 if (Math.Abs(translationWorld.W) > 0.00001f)
                 {
                     translationWorld.X = translationWorld.X/ translationWorld.W;
@@ -203,7 +178,7 @@ namespace WindowsFormsApp1.Code
                     translationWorld.Z = translationWorld.Z / translationWorld.W;
                 }
                 v[i] = new Vector2(((translationWorld.X + 1) / 2) * _resX, ((translationWorld.Y + 1) / 2)* _resY);
-                //Console.WriteLine(vector4);
+                Console.WriteLine(translationWorld);
                 i++;
             }
             DrawTriangle(v);

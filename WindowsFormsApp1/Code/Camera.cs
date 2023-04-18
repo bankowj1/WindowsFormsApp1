@@ -136,11 +136,11 @@ namespace WindowsFormsApp1.Code
                 0, 1, 0, cameraPosition.Y,
                 0, 0, 1, cameraPosition.Z,
                 0, 0, 0, 1);
-            _rotationQ = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
+            //_rotationQ = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
             
             Matrix4x4 rotationMatrix = RotationMatrixDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
+
             Console.WriteLine(rotationMatrix);
-            Console.WriteLine(Matrix4x4.CreateFromYawPitchRoll(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z));
             _viewMatrix =  translationMatrix * rotationMatrix ;
         }
 

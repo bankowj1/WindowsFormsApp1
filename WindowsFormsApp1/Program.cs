@@ -40,7 +40,7 @@ namespace WindowsFormsApp1
             
             Console.WriteLine("pretimer");
             timer = new Timer();
-            timer.Interval =1000;
+            timer.Interval =100;
             timer.Tick += new EventHandler(Update);
             timer.Start();
             Application.Run(triangleForm);
@@ -78,7 +78,7 @@ namespace WindowsFormsApp1
                     }
                 }
             }
-            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 0f, 1.1f), Vector3.Zero), 0.5f));
+            //sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 0f, 1.1f), Vector3.Zero), 0.5f));
         }
     }
 }

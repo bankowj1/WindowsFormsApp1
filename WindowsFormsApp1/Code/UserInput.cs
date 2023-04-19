@@ -38,8 +38,8 @@ namespace WindowsFormsApp1.Code
                     if (e.Modifiers == Keys.Shift)
                     {
                         // Rotate camera 
-                        rotation = new Vector3(0f, 0f, 1);
-                        CameraRotation?.Invoke(this, new RotEventArgs(rotation,-1f));
+                        rotation = new Vector3(0f, 0f, 1f);
+                        CameraRotation?.Invoke(this, new RotEventArgs(rotation,1f));
                         break;
                     }
                     else
@@ -54,7 +54,7 @@ namespace WindowsFormsApp1.Code
                     {
                         // Rotate camera 
                         rotation = new Vector3(0f, 0f, 1f);
-                        CameraRotation?.Invoke(this, new RotEventArgs(rotation,1f));
+                        CameraRotation?.Invoke(this, new RotEventArgs(rotation,-1f));
                         break;
                     
                     }

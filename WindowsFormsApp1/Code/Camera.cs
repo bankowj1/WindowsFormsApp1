@@ -138,8 +138,9 @@ namespace WindowsFormsApp1.Code
             Console.WriteLine("cameraRotation");
             Console.WriteLine(_forward);
             Console.WriteLine(cameraRotation);
-            _forward = MultMatxVec3V3(Vector3.UnitZ,RotationMatrixDeg(cameraRotation.X,cameraRotation.Y,cameraRotation.Z));
-            _forward = Vector3.Normalize(_forward);
+            Matrix4x4 matrix = RotationMatrixDeg(cameraRotation.X, cameraRotation.Y, 0);
+            Console.WriteLine(matrix);
+            _forward = MultMatxVec3V3(Vector3.UnitZ,matrix);
             Console.WriteLine(_forward);
             Vector3 vTarget = cameraPosition + _forward;
 
@@ -149,21 +150,22 @@ namespace WindowsFormsApp1.Code
 
             Vector3 a = newForward * Vector3.Dot(_up,newForward);
             Vector3 newUP = _up - a;
+            newUP = MultMatxVec3V3(newUP, RotationMatrixDeg(0, 0, cameraRotation.Z));
             newUP = Vector3.Normalize(newUP);
 
             Vector3 nR = Vector3.Cross(newUP, newForward);
-
             Matrix4x4 matrix4X4 = new Matrix4x4(
                 nR.X, nR.Y, nR.Z, 0.0f,
                 newUP.X, newUP.Y, newUP.Z, 0.0f,
                 newForward.X, newForward.Y, newForward.Z, 0.0f,
                 cameraPosition.X, cameraPosition.Y, cameraPosition.Z, 1.0f
                 );
-
             Matrix4x4.Invert(matrix4X4,out _viewMatrix);
+            Console.WriteLine("_viewMatrix");
+            Console.WriteLine(_viewMatrix);
             /*         
             
-            Console.WriteLine(rotationMatrix);
+           
             Console.WriteLine(Matrix4x4.CreateFromYawPitchRoll(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z));
             _viewMatrix =  translationMatrix * rotationMatrix ;*/
         }
@@ -294,8 +296,6 @@ namespace WindowsFormsApp1.Code
         public static Vector3 MultMatxVec3V3(Vector3 value, Matrix4x4 matrix4X4)
         {
             Vector4 v = MultMatxVec3V4(value, matrix4X4);
-            Console.WriteLine(matrix4X4);
-            Console.WriteLine(matrix4X4.M43);
             return new Vector3(v.X,v.Y,v.Z);
         }
 

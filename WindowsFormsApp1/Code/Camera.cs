@@ -59,7 +59,7 @@ namespace WindowsFormsApp1.Code
         {
             Console.WriteLine("Rotation");
             Console.WriteLine(_anchor.Rotation);
-            _anchor.Rotation = _anchor.Rotation + (e.V * e.F * _rotationSpeed);
+            _anchor.Rotation = _anchor.Rotation + MultMatxVec3V3(e.V * e.F * _rotationSpeed, RotationMatrixDeg(_anchor.Rotation.X, _anchor.Rotation.Y, _anchor.Rotation.Z));
             Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }

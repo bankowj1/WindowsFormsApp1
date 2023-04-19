@@ -40,7 +40,7 @@ namespace WindowsFormsApp1
             
             Console.WriteLine("pretimer");
             timer = new Timer();
-            timer.Interval =1000;
+            timer.Interval =30;
             timer.Tick += new EventHandler(Update);
             timer.Start();
             Application.Run(triangleForm);

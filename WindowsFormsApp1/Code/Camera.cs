@@ -165,27 +165,31 @@ namespace WindowsFormsApp1.Code
         {
             Vector2[] v = new Vector2[3];
             int i = 0;
-            foreach (MyPoint point in triangle.Points)
+            Vector3[] vector32 = new Vector3[3];
+            for (int tris = 0 ; tris < 3; tris++)
             {
 
                 //Vector4 translationWorld = Vector4.Transform(point.Position, _projectionMatrix * Matrix4x4.Transpose( _viewMatrix *(translationMatrix * rotatiobMatrix*scaleMatrix )));
                 Console.WriteLine("_anchor.Position");
-                Console.WriteLine(point.Position);
-                Vector3 vector3 = MultMatxVec3V3(point.Position, rotatiobMatrix);
-                Console.WriteLine("vector3");
-                Console.WriteLine(vector3);
+                Console.WriteLine(triangle.Points[tris].Position);
+                vector32[tris] = MultMatxVec3V3(triangle.Points[tris].Position, scaleMatrix*rotatiobMatrix * translationMatrix);
+                Console.WriteLine(rotatiobMatrix);
                 Console.WriteLine(translationMatrix);
-                Vector3 vector32 = MultMatxVec3V3(vector3, translationMatrix);
                 Console.WriteLine("vector32");
                 Console.WriteLine(vector32);
-                Vector4 vector4 = MultMatxVec3V4(vector32, _projectionMatrix);
+                
+            }
+            CalNormal(triangle);
+            for (int tris = 0; tris < 3; tris++)
+            {
+                Vector4 vector4 = MultMatxVec3V4(vector32[tris], _projectionMatrix);
                 if (Math.Abs(vector4.W) > 0.00001f)
                 {
-                    vector4.X = vector4.X/ vector4.W;
+                    vector4.X = vector4.X / vector4.W;
                     vector4.Y = vector4.Y / vector4.W;
                     vector4.Z = vector4.Z / vector4.W;
                 }
-                v[i] = new Vector2(((vector4.X + 1) / 2) * _resX, ((vector4.Y + 1) / 2)* _resY);
+                v[i] = new Vector2(((vector4.X + 1) / 2) * _resX, ((vector4.Y + 1) / 2) * _resY);
                 Console.WriteLine(vector4);
                 i++;
             }
@@ -270,6 +274,25 @@ namespace WindowsFormsApp1.Code
                 value.X * matrix4X4.M13 + value.Y * matrix4X4.M23 + value.Z * matrix4X4.M33 + matrix4X4.M43,
                 value.X * matrix4X4.M14 + value.Y * matrix4X4.M24 + value.Z * matrix4X4.M34 + matrix4X4.M44
                 );
+        }
+        public static void CalNormal(Triangle triangle)
+        {
+            Vector3 line1, line2;
+            line1 = new Vector3(
+                triangle.Points[1].Position.X - triangle.Points[0].Position.X,
+                triangle.Points[1].Position.Y - triangle.Points[0].Position.Y,
+                triangle.Points[1].Position.Z - triangle.Points[0].Position.Z
+                );
+            line2 = new Vector3(
+                triangle.Points[1].Position.X - triangle.Points[0].Position.X,
+                triangle.Points[1].Position.Y - triangle.Points[0].Position.Y,
+                triangle.Points[1].Position.Z - triangle.Points[0].Position.Z
+                );
+            triangle.Normal = new Vector3(
+                line1.Y * line2.Z - line1.Z * line2.Y,
+                line1.Z * line2.X - line1.X * line2.Z,
+                line1.X * line2.Y - line1.Y * line2.X
+                ) ;
         }
     }
 }

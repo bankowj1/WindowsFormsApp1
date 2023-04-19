@@ -17,10 +17,11 @@ namespace WindowsFormsApp1.Code
         private float _closeRange = 0.1f;
         private TriangleForm _triForm;
         private UserInput _userInput;
-        private Matrix4x4 _viewMatrix;
-        private Quaternion _rotationQ;
         private Matrix4x4 _projectionMatrix;
-
+        private Matrix4x4 _viewMatrix;
+        //rotation
+        private Vector3 _forward = Vector3.UnitZ;
+        private Vector3 _up = Vector3.UnitY;
 
         int ii=0;
 
@@ -70,9 +71,12 @@ namespace WindowsFormsApp1.Code
             _theta += e.V;
             ProjectMax();
         }
-        private void PositionCamera(object sender, Vector3EventArgs e)
+        private void PositionCamera(object sender, RotEventArgs e)
         {
-            _anchor.Position = Vector3.Add(_anchor.Position, Vector3.Transform(e.V, RotationMatrixDeg(_anchor.Rotation.X, _anchor.Rotation.Y, -_anchor.Rotation.Z)) * 0.1f);
+            //_anchor.Position = Vector3.Add(_anchor.Position, Vector3.Transform(e.V, ) * 0.1f);
+            Vector3 vForward = MultMatxVec3V3(_forward, RotationMatrixDeg(e.V.X, e.V.Y, e.V.Z));
+            _anchor.Position = Vector3.Add(_anchor.Position, vForward * 0.1f * e.F);
+
             CameraMatx();
         }
         public void SetRes(int x, int y)
@@ -124,17 +128,44 @@ namespace WindowsFormsApp1.Code
             Vector3 cameraPosition = _anchor.Position;
             Vector3 cameraRotation = _anchor.Rotation;
 
-            Matrix4x4 translationMatrix = new Matrix4x4(
+            /*Matrix4x4 translationMatrix = new Matrix4x4(
                 1, 0, 0, 0,//columna 1x 
                 0, 1, 0, 0,//columna 2x
                 0, 0, 1, 0,//columna 3x
                 cameraPosition.X, cameraPosition.Y, cameraPosition.Z, 1);//columna 4x
             _rotationQ = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
+            */
+            Console.WriteLine("cameraRotation");
+            Console.WriteLine(_forward);
+            Console.WriteLine(cameraRotation);
+            _forward = MultMatxVec3V3(Vector3.UnitZ,RotationMatrixDeg(cameraRotation.X,cameraRotation.Y,cameraRotation.Z));
+            _forward = Vector3.Normalize(_forward);
+            Console.WriteLine(_forward);
+            Vector3 vTarget = cameraPosition + _forward;
+
+            //matrix point at start
+            Vector3 newForward = vTarget - cameraPosition;
+            newForward = Vector3.Normalize(newForward);
+
+            Vector3 a = newForward * Vector3.Dot(_up,newForward);
+            Vector3 newUP = _up - a;
+            newUP = Vector3.Normalize(newUP);
+
+            Vector3 nR = Vector3.Cross(newUP, newForward);
+
+            Matrix4x4 matrix4X4 = new Matrix4x4(
+                nR.X, nR.Y, nR.Z, 0.0f,
+                newUP.X, newUP.Y, newUP.Z, 0.0f,
+                newForward.X, newForward.Y, newForward.Z, 0.0f,
+                cameraPosition.X, cameraPosition.Y, cameraPosition.Z, 1.0f
+                );
+
+            Matrix4x4.Invert(matrix4X4,out _viewMatrix);
+            /*         
             
-            Matrix4x4 rotationMatrix = RotationMatrixDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
             Console.WriteLine(rotationMatrix);
             Console.WriteLine(Matrix4x4.CreateFromYawPitchRoll(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z));
-            _viewMatrix =  translationMatrix * rotationMatrix ;
+            _viewMatrix =  translationMatrix * rotationMatrix ;*/
         }
 
         public void ObjectProjection(SceenObject sceenObject)
@@ -151,38 +182,40 @@ namespace WindowsFormsApp1.Code
                0, 0, sceenObject.Scale.Z, 0,
                0, 0, 0, 1);
 
-            Quaternion rotationQ = QuaternionFromEulerDeg(sceenObject.Anchor.Rotation.X, sceenObject.Anchor.Rotation.Y, -sceenObject.Anchor.Rotation.Z);
-
+           
             Matrix4x4 rotationMatrix = RotationMatrixDeg(sceenObject.Anchor.Rotation.X,  sceenObject.Anchor.Rotation.Y, sceenObject.Anchor.Rotation.Z);
 
             foreach (Triangle triangle in sceenObject.Triangles)
             {
-                TriangleProjectrion(triangle, translationMatrix, scaleMatrix, rotationQ,rotationMatrix);
+                TriangleProjectrion(triangle, translationMatrix, scaleMatrix,rotationMatrix);
             }
         }
 
-        public void TriangleProjectrion(Triangle triangle, Matrix4x4 translationMatrix, Matrix4x4 scaleMatrix, Quaternion rotationQ,Matrix4x4 rotatiobMatrix)
+        public void TriangleProjectrion(Triangle triangle, Matrix4x4 translationMatrix, Matrix4x4 scaleMatrix, Matrix4x4 rotatiobMatrix)
         {
             Vector2[] v = new Vector2[3];
             int i = 0;
-            Vector3[] vector32 = new Vector3[3];
+            Vector3[] vWorld = new Vector3[3];
             for (int tris = 0 ; tris < 3; tris++)
             {
 
                 //Vector4 translationWorld = Vector4.Transform(point.Position, _projectionMatrix * Matrix4x4.Transpose( _viewMatrix *(translationMatrix * rotatiobMatrix*scaleMatrix )));
-                Console.WriteLine("_anchor.Position");
-                Console.WriteLine(triangle.Points[tris].Position);
-                vector32[tris] = MultMatxVec3V3(triangle.Points[tris].Position, scaleMatrix*rotatiobMatrix * translationMatrix);
-                Console.WriteLine(rotatiobMatrix);
-                Console.WriteLine(translationMatrix);
-                Console.WriteLine("vector32");
-                Console.WriteLine(vector32);
+                //Console.WriteLine("_anchor.Position");
+                //Console.WriteLine(triangle.Points[tris].Position);
+                vWorld[tris] = MultMatxVec3V3(triangle.Points[tris].Position, scaleMatrix*rotatiobMatrix * translationMatrix);
+                //Console.WriteLine(rotatiobMatrix);
+                //Console.WriteLine(translationMatrix);
+                //Console.WriteLine("vector32");
+                //Console.WriteLine(vWorld);
                 
             }
             CalNormal(triangle);
             for (int tris = 0; tris < 3; tris++)
             {
-                Vector4 vector4 = MultMatxVec3V4(vector32[tris], _projectionMatrix);
+                Vector3 vView = MultMatxVec3V3(vWorld[tris], _viewMatrix);
+
+
+                Vector4 vector4 = MultMatxVec3V4(vView, _projectionMatrix);
                 if (Math.Abs(vector4.W) > 0.00001f)
                 {
                     vector4.X = vector4.X / vector4.W;
@@ -190,7 +223,7 @@ namespace WindowsFormsApp1.Code
                     vector4.Z = vector4.Z / vector4.W;
                 }
                 v[i] = new Vector2(((vector4.X + 1) / 2) * _resX, ((vector4.Y + 1) / 2) * _resY);
-                Console.WriteLine(vector4);
+                //Console.WriteLine(vector4);
                 i++;
             }
             DrawTriangle(v);

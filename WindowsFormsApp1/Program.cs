@@ -40,7 +40,7 @@ namespace WindowsFormsApp1
             
             Console.WriteLine("pretimer");
             timer = new Timer();
-            timer.Interval =30;
+            timer.Interval =1000/1;
             timer.Tick += new EventHandler(Update);
             timer.Start();
             Application.Run(triangleForm);
@@ -59,7 +59,7 @@ namespace WindowsFormsApp1
             foreach (SceenObject sceenObject in sceen.sceenObjects)
             {
                 camera.ObjectProjection(sceenObject);
-                sceenObject.Anchor.Rotation = new Vector3( sceenObject.Anchor.Rotation.X + 2f, sceenObject.Anchor.Rotation.Y , sceenObject.Anchor.Rotation.Z+4f);
+                //sceenObject.Anchor.Rotation = new Vector3( sceenObject.Anchor.Rotation.X + 2f, sceenObject.Anchor.Rotation.Y , sceenObject.Anchor.Rotation.Z+4f);
             }
             await triangleForm.UpdateAsync();
 

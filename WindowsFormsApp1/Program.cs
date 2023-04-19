@@ -59,6 +59,7 @@ namespace WindowsFormsApp1
             foreach (SceenObject sceenObject in sceen.sceenObjects)
             {
                 camera.ObjectProjection(sceenObject);
+                sceenObject.Anchor.Rotation = new Vector3( sceenObject.Anchor.Rotation.X + 2f, sceenObject.Anchor.Rotation.Y , sceenObject.Anchor.Rotation.Z+4f);
             }
             await triangleForm.UpdateAsync();
 
@@ -74,11 +75,11 @@ namespace WindowsFormsApp1
                 {
                     for(int k = 1; k < 3; k++)
                     {
-                        sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(-0.5f+i* 0.5f, -0.5f + j * 0.5f, 1.1f + k * 0.5f), new Vector3(0f,0f, 00f)), 0.25f));
+                       // sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(-0.5f+i* 0.5f, -0.5f + j * 0.5f, 1.1f + k * 0.5f), new Vector3(0f,0f, 00f)), 0.25f));
                     }
                 }
             }
-            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 0f, 1.1f), Vector3.Zero), 0.5f));
+            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 0f, 5f), Vector3.Zero), 0.5f));
         }
     }
 }

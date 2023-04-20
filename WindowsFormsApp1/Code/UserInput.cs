@@ -44,7 +44,7 @@ namespace WindowsFormsApp1.Code
                     }
                     else
                     {
-                        rotation = new Vector3(90f, 0f, 0f);
+                        rotation = new Vector3(0f, 1f, 0f);
                         CameraPosition?.Invoke(this, new RotEventArgs(rotation, 1f));
                         break;
                     }
@@ -60,7 +60,7 @@ namespace WindowsFormsApp1.Code
                     }
                     else
                     {
-                        rotation = new Vector3(90f, 0f, 0f);
+                        rotation = new Vector3(0f, 1f, 0f);
                         CameraPosition?.Invoke(this, new RotEventArgs(rotation, -1f));
                         break;
                     }
@@ -75,7 +75,7 @@ namespace WindowsFormsApp1.Code
                     }
                     else
                     {
-                        rotation = new Vector3(0f, 0f, 0f);
+                        rotation = new Vector3(0f, 0f, 1f);
                         CameraPosition?.Invoke(this, new RotEventArgs(rotation,1f));
                         break;
                     }
@@ -90,7 +90,7 @@ namespace WindowsFormsApp1.Code
                     }
                     else
                     {
-                        rotation = new Vector3(0f, 0f, 0f);
+                        rotation = new Vector3(0f, 0f, 1f);
                         CameraPosition?.Invoke(this, new RotEventArgs(rotation, -1f));
                         break;
                     }
@@ -105,7 +105,7 @@ namespace WindowsFormsApp1.Code
                     }
                     else
                     {
-                        rotation = new Vector3(0f, 90f, 0f);
+                        rotation = new Vector3(1f, 0f, 0f);
                         CameraPosition?.Invoke(this, new RotEventArgs(rotation, 1f));
                         break;
                     }
@@ -120,7 +120,7 @@ namespace WindowsFormsApp1.Code
                     }
                     else
                     {
-                        rotation = new Vector3(0f, 90f, 0f);
+                        rotation = new Vector3(1f, 0f, 0f);
                         CameraPosition?.Invoke(this, new RotEventArgs(rotation, -1f));
                         break;
                     }

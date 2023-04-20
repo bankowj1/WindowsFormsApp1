@@ -20,9 +20,9 @@ namespace WindowsFormsApp1.Code
         private Matrix4x4 _projectionMatrix;
         private Matrix4x4 _viewMatrix;
         //rotation
+        Matrix4x4 rotCamera;
         private Vector3 _forward = Vector3.UnitZ;
         private Vector3 _up = Vector3.UnitY;
-
         int ii=0;
 
         public TriangleForm TriForm { get => _triForm; set => _triForm = value; }
@@ -59,7 +59,21 @@ namespace WindowsFormsApp1.Code
         {
             Console.WriteLine("Rotation");
             Console.WriteLine(_anchor.Rotation);
-            _anchor.Rotation = _anchor.Rotation + MultMatxVec3V3(e.V * e.F * _rotationSpeed, RotationMatrixDeg(0,0, _anchor.Rotation.Z));
+            Vector3 move = e.V * _rotationSpeed * e.F;
+            if (e.V.Z == 1)
+            {
+                move = move;
+            }
+            if (e.V.Y == 1)
+            {
+                move = MultMatxVec3V3(move,RotationMatrixDeg(_up.X,_up.Y,_up.Z));
+            }
+            if (e.V.X == 1)
+            {
+                move = MultMatxVec3V3(move, RotationMatrixDeg(_up.X, _up.Y, _up.Z));
+            }
+            move = Vector3.Normalize(move);
+            _anchor.Rotation = _anchor.Rotation + move;
             Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }
@@ -74,8 +88,20 @@ namespace WindowsFormsApp1.Code
         private void PositionCamera(object sender, RotEventArgs e)
         {
             //_anchor.Position = Vector3.Add(_anchor.Position, Vector3.Transform(e.V, ) * 0.1f);
-            Vector3 vForward = MultMatxVec3V3(_forward, RotationMatrixDeg(e.V.X, e.V.Y, e.V.Z));
-            _anchor.Position = Vector3.Add(_anchor.Position, vForward * 0.1f * e.F);
+            Vector3 move = Vector3.Zero;
+            if(e.V.Z == 1)
+            {
+                move += _forward*0.1f*e.F;
+            }
+            if(e.V.Y == 1) 
+            {
+                move += _up * 0.1f * e.F;
+            }
+            if( e.V.X == 1) 
+            { 
+                move += Vector3.Cross(_up, _forward) * 0.1f * e.F;
+            }           
+            _anchor.Position = Vector3.Add(_anchor.Position,move);
 
             CameraMatx();
         }
@@ -148,11 +174,10 @@ namespace WindowsFormsApp1.Code
             Vector3 newForward = vTarget - cameraPosition;
             newForward = Vector3.Normalize(newForward);
 
-            Vector3 a = newForward * Vector3.Dot(_up,newForward);
-            Vector3 newUP = _up - a;
-            newUP = MultMatxVec3V3(newUP, RotationMatrixDeg(0, 0, cameraRotation.Z));
+            Vector3 a = newForward * Vector3.Dot( MultMatxVec3V3(Vector3.UnitY, RotationMatrixDeg(0, 0, cameraRotation.Z)), newForward);
+            Vector3 newUP = Vector3.UnitY - a;
             newUP = Vector3.Normalize(newUP);
-
+            _up = newUP;
             Vector3 nR = Vector3.Cross(newUP, newForward);
             Matrix4x4 matrix4X4 = new Matrix4x4(
                 nR.X, nR.Y, nR.Z, 0.0f,

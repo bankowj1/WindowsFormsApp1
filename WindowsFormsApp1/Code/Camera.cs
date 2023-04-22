@@ -61,22 +61,18 @@ namespace WindowsFormsApp1.Code
             Vector3 right = Vector3.Normalize(Vector3.Cross(_forward,_up));
             if (e.V.Z == 1)
             {
-                _up = new Vector3(
-                    _up.X * (float)Math.Cos(Radians(move.Z)) - _up.Y * (float)Math.Sin(Radians(move.Z)),
-                    _up.X * (float)Math.Sin(Radians(move.Z)) + _up.Y * (float)Math.Cos(Radians(move.Z)),
-                    0.0f
-                    );
+                _up = MultMatxVec3V3(_up, RotationMatrixDeg(move.X, move.Y, move.Z));
             }
             if (e.V.Y == 1)
             {
-                _forward = _forward * (float)Math.Cos(Radians(move.X)) + right * (float)Math.Sin(Radians(move.X));
-                _up = Vector3.Cross(right, _forward);
-                
+                right = MultMatxVec3V3(right,RotationMatrixDeg(move.X,move.Y,move.Z));
+                _forward = Vector3.Cross(_up,right);
+                _forward = Vector3.Normalize(_forward);
             }
             if (e.V.X == 1)
             {
-                right = right * (float)Math.Cos(Radians(move.Y)) + _up * (float)Math.Sin(Radians(move.Y));
-                _forward = Vector3.Cross(_up, right);
+                _forward = MultMatxVec3V3(_forward, RotationMatrixDeg(move.X, move.Y, move.Z));
+                _up = MultMatxVec3V3(_forward, RotationMatrixDeg(move.X, move.Y, move.Z));
             }
             CameraMatx();
         }

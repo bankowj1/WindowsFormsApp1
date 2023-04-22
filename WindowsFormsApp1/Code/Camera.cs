@@ -57,6 +57,7 @@ namespace WindowsFormsApp1.Code
         }
         private void RotateCamera(object sender, RotEventArgs e)
         {
+            /*
             Vector3 move = e.V * _rotationSpeed * e.F;
             Vector3 right = Vector3.Normalize(Vector3.Cross(_forward,_up));
             if (e.V.Z == 1)
@@ -74,6 +75,10 @@ namespace WindowsFormsApp1.Code
                 _forward = MultMatxVec3V3(_forward, RotationMatrixDeg(move.X, move.Y, move.Z));
                 _up = MultMatxVec3V3(_up, RotationMatrixDeg(move.X, move.Y, move.Z));
             }
+            */
+            _anchor.Rotation += MultQuatVec3V3((e.V * _rotationSpeed * e.F), quaternionDirection);
+
+            _anchor.Rotation = new Vector3(_anchor.Rotation.X%360, _anchor.Rotation.Y%360, _anchor.Rotation.Z%360);
             CameraMatx();
         }
 
@@ -153,17 +158,18 @@ namespace WindowsFormsApp1.Code
             Vector3 cameraPosition = _anchor.Position;
             Vector3 cameraRotation = _anchor.Rotation;
 
-            /*Matrix4x4 translationMatrix = new Matrix4x4(
+            Matrix4x4 translationMatrix = new Matrix4x4(
                 1, 0, 0, 0,//columna 1x 
                 0, 1, 0, 0,//columna 2x
                 0, 0, 1, 0,//columna 3x
                 cameraPosition.X, cameraPosition.Y, cameraPosition.Z, 1);//columna 4x
-            _rotationQ = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
-            */
-          
-            
-            
-            Matrix4x4.Invert(PointAt(cameraPosition, cameraPosition+_forward, _up),out _viewMatrix);
+            quaternionDirection = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, cameraRotation.Z);
+
+            _forward= MultQuatVec3V3(Vector3.UnitZ, quaternionDirection);
+            _up = MultQuatVec3V3(Vector3.UnitY, quaternionDirection);
+
+            //Matrix4x4.Invert(PointAt(cameraPosition, cameraPosition+_forward, _up),out _viewMatrix);
+            _viewMatrix = ViewFromQuat(quaternionDirection, cameraPosition);
             Console.WriteLine("_viewMatrix");
             Console.WriteLine(_viewMatrix);
             /*         
@@ -172,6 +178,40 @@ namespace WindowsFormsApp1.Code
             Console.WriteLine(Matrix4x4.CreateFromYawPitchRoll(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z));
             _viewMatrix =  translationMatrix * rotationMatrix ;*/
         }
+        public Matrix4x4 ViewFromQuat(Quaternion q,Vector3 centre)
+        {
+            float sqw = q.W * q.W;
+            float sqx = q.X * q.X;
+            float sqy = q.Y * q.Y;
+            float sqz = q.Z * q.Z;
+            Matrix4x4 m = new Matrix4x4();
+            m.M11 =  sqx - sqy - sqz + sqw;
+            m.M22 = -sqx + sqy - sqz + sqw;
+            m.M33 = -sqx - sqy + sqz + sqw;
+
+            float tmp1 = q.X * q.Y;
+            float tmp2 = q.Z * q.W;
+            m.M12 = 2.0f * (tmp1 + tmp2);
+            m.M21 = 2.0f * (tmp1 - tmp2);
+
+            tmp1 = q.X * q.Z;
+            tmp2 = q.Y * q.W;
+            m.M13 = 2.0f * (tmp1 - tmp2);
+            m.M31 = 2.0f * (tmp1 + tmp2);
+
+            tmp1 = q.Y * q.Z;
+            tmp2 = q.X * q.W;
+            m.M23 = 2.0f * (tmp1 + tmp2);
+            m.M32 = 2.0f * (tmp1 - tmp2);
+
+            m.M14 = centre.X - centre.X * m.M11 - centre.Y * m.M12 - centre.Z * m.M13;
+            m.M24 = centre.Y - centre.X * m.M21 - centre.Y * m.M22 - centre.Z * m.M23;
+            m.M34 = centre.Z - centre.X * m.M31 - centre.Y * m.M32 - centre.Z * m.M33;
+            m.M41 = m.M42 = m.M43 = 0.0f;
+	        m.M44 = 1.0f;
+            return m;
+        }
+
         public Matrix4x4 PointAt(Vector3 eye,Vector3 at, Vector3 up)
         {
             //calc new forward
@@ -316,6 +356,12 @@ namespace WindowsFormsApp1.Code
             var res = Quaternion.Conjugate(rotation) * q * rotation;
 
             return new Vector3(res.X, res.Y, res.Z);
+        }
+        public static Vector3 MultQuatVec3V3(Vector3 v, Quaternion q)
+        {
+            Vector3 u = new Vector3(q.X, q.Y, q.Z);
+            float s = q.W;
+            return 2.0f * Vector3.Dot(u, v) * u + (s * s - Vector3.Dot(u, u)) * v + 2.0f * s * Vector3.Cross(u, v);
         }
         public static Vector3 MultMatxVec3V3(Vector3 value, Matrix4x4 matrix4X4)
         {

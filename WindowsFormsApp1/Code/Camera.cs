@@ -20,7 +20,7 @@ namespace WindowsFormsApp1.Code
         private Matrix4x4 _projectionMatrix;
         private Matrix4x4 _viewMatrix;
         //rotation
-        Matrix4x4 rotCamera;
+        Quaternion quaternionDirection = new Quaternion(0,0,0,1);
         private Vector3 _forward = Vector3.UnitZ;
         private Vector3 _up = Vector3.UnitY;
         int ii=0;
@@ -72,7 +72,7 @@ namespace WindowsFormsApp1.Code
             if (e.V.X == 1)
             {
                 _forward = MultMatxVec3V3(_forward, RotationMatrixDeg(move.X, move.Y, move.Z));
-                _up = MultMatxVec3V3(_forward, RotationMatrixDeg(move.X, move.Y, move.Z));
+                _up = MultMatxVec3V3(_up, RotationMatrixDeg(move.X, move.Y, move.Z));
             }
             CameraMatx();
         }

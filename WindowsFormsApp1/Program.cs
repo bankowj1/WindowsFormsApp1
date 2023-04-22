@@ -79,7 +79,10 @@ namespace WindowsFormsApp1
                     }
                 }
             }
-            //sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 0f, 5f), Vector3.Zero), 0.5f));
+            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 00f, 15f), Vector3.Zero), 0.5f));
+            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 5f, 10f), Vector3.Zero), 0.5f));
+            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 10f, 5f), Vector3.Zero), 0.5f));
+
         }
     }
 }

@@ -57,24 +57,27 @@ namespace WindowsFormsApp1.Code
         }
         private void RotateCamera(object sender, RotEventArgs e)
         {
-            Console.WriteLine("Rotation");
-            Console.WriteLine(_anchor.Rotation);
             Vector3 move = e.V * _rotationSpeed * e.F;
+            Vector3 right = Vector3.Normalize(Vector3.Cross(_forward,_up));
             if (e.V.Z == 1)
             {
-                move = move;
+                _up = new Vector3(
+                    _up.X * (float)Math.Cos(Radians(move.Z)) - _up.Y * (float)Math.Sin(Radians(move.Z)),
+                    _up.X * (float)Math.Sin(Radians(move.Z)) + _up.Y * (float)Math.Cos(Radians(move.Z)),
+                    0.0f
+                    );
             }
             if (e.V.Y == 1)
             {
-                move = MultMatxVec3V3(move,RotationMatrixDeg(_up.X,_up.Y,_up.Z));
+                _forward = _forward * (float)Math.Cos(Radians(move.X)) + right * (float)Math.Sin(Radians(move.X));
+                _up = Vector3.Cross(right, _forward);
+                
             }
             if (e.V.X == 1)
             {
-                move = MultMatxVec3V3(move, RotationMatrixDeg(_up.X, _up.Y, _up.Z));
+                right = right * (float)Math.Cos(Radians(move.Y)) + _up * (float)Math.Sin(Radians(move.Y));
+                _forward = Vector3.Cross(_up, right);
             }
-            move = Vector3.Normalize(move);
-            _anchor.Rotation = _anchor.Rotation + move;
-            Console.WriteLine(_anchor.Rotation);
             CameraMatx();
         }
 
@@ -161,31 +164,10 @@ namespace WindowsFormsApp1.Code
                 cameraPosition.X, cameraPosition.Y, cameraPosition.Z, 1);//columna 4x
             _rotationQ = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z);
             */
-            Console.WriteLine("cameraRotation");
-            Console.WriteLine(_forward);
-            Console.WriteLine(cameraRotation);
-            Matrix4x4 matrix = RotationMatrixDeg(cameraRotation.X, cameraRotation.Y, 0);
-            Console.WriteLine(matrix);
-            _forward = MultMatxVec3V3(Vector3.UnitZ,matrix);
-            Console.WriteLine(_forward);
-            Vector3 vTarget = cameraPosition + _forward;
-
-            //matrix point at start
-            Vector3 newForward = vTarget - cameraPosition;
-            newForward = Vector3.Normalize(newForward);
-
-            Vector3 a = newForward * Vector3.Dot( MultMatxVec3V3(Vector3.UnitY, RotationMatrixDeg(0, 0, cameraRotation.Z)), newForward);
-            Vector3 newUP = Vector3.UnitY - a;
-            newUP = Vector3.Normalize(newUP);
-            _up = newUP;
-            Vector3 nR = Vector3.Cross(newUP, newForward);
-            Matrix4x4 matrix4X4 = new Matrix4x4(
-                nR.X, nR.Y, nR.Z, 0.0f,
-                newUP.X, newUP.Y, newUP.Z, 0.0f,
-                newForward.X, newForward.Y, newForward.Z, 0.0f,
-                cameraPosition.X, cameraPosition.Y, cameraPosition.Z, 1.0f
-                );
-            Matrix4x4.Invert(matrix4X4,out _viewMatrix);
+          
+            
+            
+            Matrix4x4.Invert(PointAt(cameraPosition, cameraPosition+_forward, _up),out _viewMatrix);
             Console.WriteLine("_viewMatrix");
             Console.WriteLine(_viewMatrix);
             /*         
@@ -193,6 +175,27 @@ namespace WindowsFormsApp1.Code
            
             Console.WriteLine(Matrix4x4.CreateFromYawPitchRoll(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z));
             _viewMatrix =  translationMatrix * rotationMatrix ;*/
+        }
+        public Matrix4x4 PointAt(Vector3 eye,Vector3 at, Vector3 up)
+        {
+            //calc new forward
+            Vector3 newForward = at - eye;
+            newForward = Vector3.Normalize(newForward);
+
+            //calc new up
+            Vector3 a = newForward * Vector3.Dot(up, newForward);
+            Vector3 newUp = up - a;
+            newUp = Vector3.Normalize(newUp);
+
+            Vector3 newRight = Vector3.Cross(newUp, newForward);
+
+
+            Matrix4x4 m = new Matrix4x4(
+                newRight.X, newRight.Y, newRight.Z, 0.0f,
+                newUp.X, newUp.Y, newUp.Z, 0.0f,
+                newForward.X, newForward.Y, newForward.Z, 0.0f,
+                eye.X, eye.Y, eye.Z, 1.0f);
+            return m;
         }
 
         public void ObjectProjection(SceenObject sceenObject)
@@ -352,5 +355,6 @@ namespace WindowsFormsApp1.Code
                 line1.X * line2.Y - line1.Y * line2.X
                 ) ;
         }
+
     }
 }

@@ -76,7 +76,7 @@ namespace WindowsFormsApp1.Code
                     else
                     {
                         rotation = new Vector3(0f, 0f, 1f);
-                        CameraPosition?.Invoke(this, new RotEventArgs(rotation,1f));
+                        CameraPosition?.Invoke(this, new RotEventArgs(rotation,-1f));
                         break;
                     }
                     break;
@@ -91,7 +91,7 @@ namespace WindowsFormsApp1.Code
                     else
                     {
                         rotation = new Vector3(0f, 0f, 1f);
-                        CameraPosition?.Invoke(this, new RotEventArgs(rotation, -1f));
+                        CameraPosition?.Invoke(this, new RotEventArgs(rotation, 1f));
                         break;
                     }
                     break;

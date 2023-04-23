@@ -67,25 +67,9 @@ namespace WindowsFormsApp1.Code
         {
             
             Vector3 move = e.V * _rotationSpeed * e.F;
-            Vector3 right = Vector3.Normalize(Vector3.Cross(_forward,_up));
-            if (e.V.Z == 1)
-            {
-                _up = MultMatxVec3V3(_up, RotationMatrixDeg(move.X, move.Y, move.Z));
-            }
-            if (e.V.Y == 1)
-            {
-                right = MultMatxVec3V3(right,RotationMatrixDeg(move.X,move.Y,move.Z));
-                _forward = Vector3.Cross(_up,right);
-                _forward = Vector3.Normalize(_forward);
-            }
-            if (e.V.X == 1)
-            {
-                _forward = MultMatxVec3V3(_forward, RotationMatrixDeg(move.X, move.Y, move.Z));
-                _up = MultMatxVec3V3(_up, RotationMatrixDeg(move.X, move.Y, move.Z));
-            }
-            _anchor.Rotation += MultQuatVec3V3((e.V * _rotationSpeed * e.F), quaternionDirection);
-
-            _anchor.Rotation = new Vector3(_anchor.Rotation.X%360, _anchor.Rotation.Y%360, _anchor.Rotation.Z%360);
+            Vector3 changedRot = _anchor.Rotation+move;
+            
+            _anchor.Rotation = new Vector3(changedRot.X%360, changedRot.Y%360, changedRot.Z%360);
             _triForm.rot = _anchor.Rotation;
             CameraMatx();
         }
@@ -103,30 +87,11 @@ namespace WindowsFormsApp1.Code
         private void PositionCamera(object sender, RotEventArgs e)
         {
             //_anchor.Position = Vector3.Add(_anchor.Position, Vector3.Transform(e.V, ) * 0.1f);
-            Vector3 move = Vector3.Zero;
-            if(e.V.Z == 1)
-            {
-                move += Transform(_forward,quaternionDirection) *0.1f*e.F;
-            }
-            if(e.V.Y == 1) 
-            {
-                move += Transform(_up, quaternionDirection) * 0.1f * e.F;
-            }
-            if( e.V.X == 1) 
-            { 
-                move += Vector3.Cross(Transform(_up, quaternionDirection), Transform(_forward, quaternionDirection)) * 0.1f * e.F;
-            }
+            Vector3 move = e.V*e.F;
+            move = Transform(move, quaternionDirection);
             Console.WriteLine(_anchor.Rotation);
-            _anchor.Position = Vector3.Add(_anchor.Position,move);
-            //Console.WriteLine("e.V * 0.1f * e.F");
-            //Console.WriteLine(e.V * 0.1f * e.F);
-            //Console.WriteLine("quaternionDirection");
-            //Console.WriteLine(_anchor.Rotation);
-            //Console.WriteLine("transformed");
-            //Console.WriteLine(Transform(e.V * 0.1f * e.F, quaternionDirection));
-            //Console.WriteLine("_anchor.Position");
-            //Console.WriteLine(_anchor.Position);
-            //_anchor.Position += Transform(e.V * 0.1f * e.F, quaternionDirection);
+            move = move * 0.1f;
+            _anchor.Position = Vector3.Add(_anchor.Position,new Vector3(move.X,move.Y,-move.Z));
             Console.WriteLine(_anchor.Position);
             _triForm.pos = _anchor.Position;
             CameraMatx();

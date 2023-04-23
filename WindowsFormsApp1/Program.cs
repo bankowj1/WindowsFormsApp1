@@ -28,7 +28,7 @@ namespace WindowsFormsApp1
             InitSceen();
             triangleForm = new TriangleForm();
             UserInput = new UserInput(triangleForm);
-            camera = new Camera(new MyPoint(new Vector3(0f, 0f,0), new Vector3(0f, 0f, 0f)), Vector3.One,UserInput);
+            camera = new Camera(new MyPoint(new Vector3(0f, 0f,-10), new Vector3(0f, 0f, 0f)), Vector3.One,UserInput);
             camera.TriForm = triangleForm;
             foreach (SceenObject sceenObject in sceen.sceenObjects)
             {
@@ -40,7 +40,7 @@ namespace WindowsFormsApp1
             
             Console.WriteLine("pretimer");
             timer = new Timer();
-            timer.Interval =1000/120;
+            timer.Interval =1000/10;
             timer.Tick += new EventHandler(Update);
             timer.Start();
             Application.Run(triangleForm);
@@ -79,9 +79,9 @@ namespace WindowsFormsApp1
                     }
                 }
             }
-            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 00f, 15f), Vector3.Zero), 0.5f));
-            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 5f, 10f), Vector3.Zero), 0.5f));
-            sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 10f, 5f), Vector3.Zero), 0.5f));
+            //sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 00f, 15f), Vector3.Zero), 0.5f));
+            //sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 5f, 10f), Vector3.Zero), 0.5f));
+            //sceen.AddSceenObject(solids.CreateCube(new MyPoint(new Vector3(0f, 10f, 5f), Vector3.Zero), 0.5f));
 
         }
     }

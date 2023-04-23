@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Windows.Forms;
 using WindowsFormsApp1.Data;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace WindowsFormsApp1.Code
 {
@@ -65,11 +66,26 @@ namespace WindowsFormsApp1.Code
 
         private void RotateCamera(object sender, RotEventArgs e)
         {
-            
+            Console.WriteLine("curr");
+            Console.WriteLine(_anchor.Rotation);
+            Console.WriteLine("rotcamdoit");
             Vector3 move = e.V * _rotationSpeed * e.F;
-            Vector3 changedRot = _anchor.Rotation+move;
+            Console.WriteLine(move);
+            Quaternion q1 = QuaternionFromEulerDeg(move.X, move.Y, move.Z);
+            q1 = Quaternion.Normalize(q1);
+            Console.WriteLine(q1);
+            Console.WriteLine(quaternionDirection);
+            Console.WriteLine(DegFromQuat(q1));
+            Console.WriteLine(DegFromQuat(quaternionDirection));
+            Quaternion comb =  quaternionDirection* q1;
+            quaternionDirection = Quaternion.Normalize(comb);
+            Console.WriteLine(quaternionDirection);
+            Vector3 res = DegFromQuat(quaternionDirection);
+            Console.WriteLine(res);
+           
             
-            _anchor.Rotation = new Vector3(changedRot.X%360, changedRot.Y%360, changedRot.Z%360);
+            _anchor.Rotation = new Vector3(res.X%360, res.Y%360, res.Z%360);
+            Console.WriteLine(_anchor.Rotation);
             _triForm.rot = _anchor.Rotation;
             CameraMatx();
         }
@@ -150,7 +166,8 @@ namespace WindowsFormsApp1.Code
                 0, 1, 0, 0,//columna 2x
                 0, 0, 1, 0,//columna 3x
                 cameraPosition.X, cameraPosition.Y, cameraPosition.Z, 1);//columna 4x
-            quaternionDirection = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, cameraRotation.Z);
+            if(quaternionDirection == new Quaternion(0,0,0,1))
+                quaternionDirection = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, cameraRotation.Z);
             quaternionDirection = Quaternion.Normalize(quaternionDirection);
             //Matrix4x4.Invert(PointAt(cameraPosition, cameraPosition+_forward, _up),out _viewMatrix);
             //Console.WriteLine("_viewMatrix");
@@ -354,7 +371,7 @@ namespace WindowsFormsApp1.Code
         {
             return QuaternionFromEulerRad(Radians(x), Radians(y), Radians(z));
         }
-            public static Quaternion QuaternionFromEulerRad(float x, float y, float z)
+        public static Quaternion QuaternionFromEulerRad(float x, float y, float z)
         {
             double cr = Math.Cos(x * 0.5);
             double sr = Math.Sin(x * 0.5);
@@ -367,6 +384,44 @@ namespace WindowsFormsApp1.Code
                 y: (float)(cr * sp * cy + sr * cp * sy),
                 z: (float)(cr * cp * sy - sr * sp * cy),
                 w: (float)(cr * cp * cy + sr * sp * sy));
+        }
+        public static Vector3 DegFromQuat(Quaternion q)
+        {
+            Vector3 v = RadFromQuat(q);
+            return new Vector3(v.X *(float)(180/Math.PI), v.Y * (float)(180 / Math.PI), v.Z * (float)(180 / Math.PI));
+        }
+
+        public static Vector3 RadFromQuat(Quaternion q)
+        {
+            Vector3 v = new Vector3();
+            // roll / x
+            double sinr_cosp = 2 * (q.W * q.X + q.Y * q.Z);
+            double cosr_cosp = 1 - 2 * (q.X * q.X + q.Y * q.Y);
+            v.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+            // pitch / y
+            double sinp = 2 * (q.W * q.Y - q.Z * q.X);
+            if (Math.Abs(sinp) >= 1)
+            {
+                if(sinp < 0)
+                {
+                    v.Y = -(float)Math.PI / 2;
+                }
+                else
+                {
+                    v.Y = (float)Math.PI / 2;
+                }
+            }
+            else
+            {
+                v.Y = (float)Math.Asin(sinp);
+            }
+
+            // yaw / z
+            double siny_cosp = 2 * (q.W * q.Z + q.X * q.Y);
+            double cosy_cosp = 1 - 2 * (q.Y * q.Y + q.Z * q.Z);
+            v.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+            return v;
         }
 
         public static float Radians(float f)

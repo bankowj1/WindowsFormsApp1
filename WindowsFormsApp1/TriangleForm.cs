@@ -14,6 +14,7 @@ namespace WindowsFormsApp1
         public List<Vector2[]> triangles;
         public Vector3 pos = Vector3.Zero;
         public Vector3 rot = Vector3.Zero;
+        public float theta = 0;
 
         public TriangleForm()
         {
@@ -80,16 +81,21 @@ namespace WindowsFormsApp1
                     };
                     e.Graphics.DrawPolygon(new Pen(Color.Black, 2), points);
                 }
-            string text = string.Format("({0}, {1}, {2})", pos.X, pos.Y, pos.Z);
+            string text = string.Format("Position: ({0}, {1}, {2})", pos.X, pos.Y, pos.Z);
             SizeF size = e.Graphics.MeasureString(text, Font);
             float x = pictureBox1.Width - size.Width - 10;
             float y = 10;
             e.Graphics.DrawString(text, Font, Brushes.Black, x, y);
 
-            text = string.Format("({0}, {1}, {2})", rot.X, rot.Y, rot.Z);
+            text = string.Format("Rotation: ({0}, {1}, {2})", rot.X, rot.Y, rot.Z);
             size = e.Graphics.MeasureString(text, Font);
             x = pictureBox1.Width - size.Width - 10;
             y = 40;
+            e.Graphics.DrawString(text, Font, Brushes.Black, x, y);
+            text = string.Format("Theta: {0}", theta);
+            size = e.Graphics.MeasureString(text, Font);
+            x = pictureBox1.Width - size.Width - 10;
+            y = 70;
             e.Graphics.DrawString(text, Font, Brushes.Black, x, y);
 
         }

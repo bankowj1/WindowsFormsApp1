@@ -30,6 +30,7 @@ namespace WindowsFormsApp1
             UserInput = new UserInput(triangleForm);
             camera = new Camera(new MyPoint(new Vector3(0f, 0f,-10), new Vector3(0f, 0f, 0f)), Vector3.One,UserInput);
             camera.TriForm = triangleForm;
+            camera.GUI();
             foreach (SceenObject sceenObject in sceen.sceenObjects)
             {
                 camera.ObjectProjection(sceenObject);

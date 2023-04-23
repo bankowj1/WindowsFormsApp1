@@ -50,11 +50,19 @@ namespace WindowsFormsApp1.Code
             _userInput.CameraRotation += RotateCamera;
             _userInput.CameraZoom += ZoomCamera;
             _userInput.CameraPosition += PositionCamera;
+
             //projection matrix
             ProjectMax();
             //view matrix
             CameraMatx();
         }
+        public void GUI()
+        {
+            _triForm.pos = _anchor.Position;
+            _triForm.rot = _anchor.Rotation;
+            _triForm.theta = _theta;
+        }
+
         private void RotateCamera(object sender, RotEventArgs e)
         {
             
@@ -87,6 +95,9 @@ namespace WindowsFormsApp1.Code
         private void ZoomCamera(object sender, FloatEventArgs e)
         {
             _theta += e.V;
+            if (_theta > 180)
+                _theta = 180;
+            _triForm.theta = _theta;
             ProjectMax();
         }
         private void PositionCamera(object sender, RotEventArgs e)

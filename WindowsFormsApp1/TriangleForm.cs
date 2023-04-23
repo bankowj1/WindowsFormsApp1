@@ -12,6 +12,8 @@ namespace WindowsFormsApp1
     {
         private PictureBox pictureBox1;
         public List<Vector2[]> triangles;
+        public Vector3 pos = Vector3.Zero;
+        public Vector3 rot = Vector3.Zero;
 
         public TriangleForm()
         {
@@ -23,6 +25,8 @@ namespace WindowsFormsApp1
             Controls.Add(pictureBox1);
             triangles = new List<Vector2[]>();
         }
+
+
 
         public async Task UpdateAsync()
         {
@@ -41,6 +45,7 @@ namespace WindowsFormsApp1
 
             pictureBox1.Paint += paintHandler;
 
+
             await tcs.Task;
 
             Console.WriteLine("Update Form");
@@ -55,6 +60,8 @@ namespace WindowsFormsApp1
             new Point(pictureBox1.Width / 2, 10)
             };
             e.Graphics.DrawPolygon(new Pen(Color.Black, 2), points);
+
+            
         }
 
         private async void DrawTriangles(object sender, PaintEventArgs e)
@@ -73,8 +80,18 @@ namespace WindowsFormsApp1
                     };
                     e.Graphics.DrawPolygon(new Pen(Color.Black, 2), points);
                 }
-            
-            
+            string text = string.Format("({0}, {1}, {2})", pos.X, pos.Y, pos.Z);
+            SizeF size = e.Graphics.MeasureString(text, Font);
+            float x = pictureBox1.Width - size.Width - 10;
+            float y = 10;
+            e.Graphics.DrawString(text, Font, Brushes.Black, x, y);
+
+            text = string.Format("({0}, {1}, {2})", rot.X, rot.Y, rot.Z);
+            size = e.Graphics.MeasureString(text, Font);
+            x = pictureBox1.Width - size.Width - 10;
+            y = 40;
+            e.Graphics.DrawString(text, Font, Brushes.Black, x, y);
+
         }
 
         public void AddTriangle(Vector2[] v)

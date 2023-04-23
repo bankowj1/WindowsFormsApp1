@@ -78,6 +78,7 @@ namespace WindowsFormsApp1.Code
             _anchor.Rotation += MultQuatVec3V3((e.V * _rotationSpeed * e.F), quaternionDirection);
 
             _anchor.Rotation = new Vector3(_anchor.Rotation.X%360, _anchor.Rotation.Y%360, _anchor.Rotation.Z%360);
+            _triForm.rot = _anchor.Rotation;
             CameraMatx();
         }
 
@@ -94,20 +95,29 @@ namespace WindowsFormsApp1.Code
             Vector3 move = Vector3.Zero;
             if(e.V.Z == 1)
             {
-                move += _forward*0.1f*e.F;
+                move += Transform(_forward,quaternionDirection) *0.1f*e.F;
             }
             if(e.V.Y == 1) 
             {
-                move += _up * 0.1f * e.F;
+                move += Transform(_up, quaternionDirection) * 0.1f * e.F;
             }
             if( e.V.X == 1) 
             { 
-                move += Vector3.Cross(_up, _forward) * 0.1f * e.F;
+                move += Vector3.Cross(Transform(_up, quaternionDirection), Transform(_forward, quaternionDirection)) * 0.1f * e.F;
             }
-            //_anchor.Position = Vector3.Add(_anchor.Position,move);
+            Console.WriteLine(_anchor.Rotation);
+            _anchor.Position = Vector3.Add(_anchor.Position,move);
+            //Console.WriteLine("e.V * 0.1f * e.F");
+            //Console.WriteLine(e.V * 0.1f * e.F);
+            //Console.WriteLine("quaternionDirection");
+            //Console.WriteLine(_anchor.Rotation);
+            //Console.WriteLine("transformed");
+            //Console.WriteLine(Transform(e.V * 0.1f * e.F, quaternionDirection));
+            //Console.WriteLine("_anchor.Position");
+            //Console.WriteLine(_anchor.Position);
+            //_anchor.Position += Transform(e.V * 0.1f * e.F, quaternionDirection);
             Console.WriteLine(_anchor.Position);
-            _anchor.Position += Transform(e.V * 0.1f * e.F, quaternionDirection);
-            Console.WriteLine(_anchor.Position);
+            _triForm.pos = _anchor.Position;
             CameraMatx();
         }
         public void SetRes(int x, int y)
@@ -166,17 +176,15 @@ namespace WindowsFormsApp1.Code
                 cameraPosition.X, cameraPosition.Y, cameraPosition.Z, 1);//columna 4x
             quaternionDirection = QuaternionFromEulerDeg(cameraRotation.X, cameraRotation.Y, cameraRotation.Z);
             quaternionDirection = Quaternion.Normalize(quaternionDirection);
-            Matrix4x4.Invert(PointAt(cameraPosition, cameraPosition+_forward, _up),out _viewMatrix);
-            Console.WriteLine("_viewMatrix");
-            Console.WriteLine(PointAt(cameraPosition, cameraPosition + _forward, _up));
-            Matrix4x4.Invert( ViewFromQuat(quaternionDirection, cameraPosition),out _viewMatrix);
-            Console.WriteLine("_viewMatrix");
-            Console.WriteLine(ViewFromQuat(quaternionDirection, cameraPosition));
+            //Matrix4x4.Invert(PointAt(cameraPosition, cameraPosition+_forward, _up),out _viewMatrix);
+            //Console.WriteLine("_viewMatrix");
+            //Console.WriteLine(PointAt(cameraPosition, cameraPosition + _forward, _up));
+            //Matrix4x4.Invert( ViewFromQuat(quaternionDirection, cameraPosition),out _viewMatrix);
+            //Console.WriteLine("_viewMatrix");
+            //Console.WriteLine(ViewFromQuat(quaternionDirection, cameraPosition));
             Matrix4x4.Invert(RotFromQuad(quaternionDirection) * translationMatrix, out _viewMatrix);
             Console.WriteLine("rotmat");
-            Console.WriteLine(RotFromQuad(quaternionDirection)* translationMatrix);
-            Console.WriteLine("rotmat");
-            Console.WriteLine(Matrix4x4.CreateFromQuaternion(quaternionDirection));
+            Console.WriteLine(_viewMatrix);
 
             /*        
             Console.WriteLine(Matrix4x4.CreateFromYawPitchRoll(cameraRotation.X, cameraRotation.Y, -cameraRotation.Z));
@@ -339,7 +347,7 @@ namespace WindowsFormsApp1.Code
         public void DrawTriangle(Vector2[] v)
         {
             TriForm.AddTriangle(v);
-            Console.WriteLine(ii++);
+            //Console.WriteLine(ii++);
         }
         public static Matrix4x4 RotationMatrixDeg(float x, float y, float z)
         {
